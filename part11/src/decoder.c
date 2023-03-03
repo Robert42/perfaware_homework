@@ -1,6 +1,6 @@
 enum Op_Code
 {
-  OP_MOV = 0x22 // 0b100010
+  OP_MOV = 042 // 0b100010
 };
 static_assert(sizeof(enum Op_Code) == 1);
 
