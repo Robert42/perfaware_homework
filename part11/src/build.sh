@@ -1,0 +1,1 @@
+gcc -fshort-enums main.c -o sim8086
