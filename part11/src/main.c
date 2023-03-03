@@ -1,8 +1,13 @@
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "decoder.c"
+
 #define BUF_SIZE 4096
-unsigned char bytes[BUF_SIZE] = {};
+uint8_t bytes[BUF_SIZE] = {};
 int num_bytes = 0;
 
 int main(int argc, char** argv)
