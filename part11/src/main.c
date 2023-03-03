@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ASSERT(COND, ...) do { \
+    if(!(COND)) \
+    { \
+      fprintf(stderr, "" __VA_ARGS__); \
+      fprintf(stderr, "\n"); \
+      exit(1); \
+    } \
+  } while(false)
+
 #include "decoder.c"
 
 #define BUF_SIZE 4096
@@ -14,28 +23,16 @@ int main(int argc, char** argv)
 {
   // get filename from args
   const char* const program = argv[0];
-  if(argc != 2)
-  {
-    fprintf(stderr, "usage: %s [FILE]\n", program);
-    exit(1);
-  }
+  ASSERT(argc == 2, "usage: %s [FILE]\n", program);
   const char* const filepath = argv[1];
 
   // read file
   {
     FILE* f = fopen(filepath, "rb");
-    if(f == NULL)
-    {
-      fprintf(stderr, "Could not open: <%s> for reading\n", filepath);
-      exit(1);
-    }
+    ASSERT(f != NULL, "Could not open: <%s> for reading\n", filepath);
     num_bytes = fread(bytes, 1, BUF_SIZE, f);
     fclose(f);
-    if(num_bytes >= BUF_SIZE)
-    {
-      fprintf(stderr, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
-      exit(1);
-    }
+    ASSERT(num_bytes < BUF_SIZE, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
   }
 
   // output
