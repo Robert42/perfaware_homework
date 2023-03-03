@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
   // output
   printf("; %s\n", filepath);
-  printf("bits 16\n");
+  printf("bits 16\n\n");
 
   for(int i=0; i < num_bytes;)
     instr_print(instr_decode(bytes, &i, num_bytes));
