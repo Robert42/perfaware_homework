@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ASSERT(COND, ...) do { \
     if(!(COND)) \
@@ -37,7 +38,8 @@ int main(int argc, char** argv)
 
   // output
   printf("; %s\n", filepath);
+  printf("bits 16\n");
 
-  for(int i=0; i < num_bytes; ++i)
-    decode_and_print(bytes, &i, num_bytes);
+  for(int i=0; i < num_bytes;)
+    instr_print(instr_decode(bytes, &i, num_bytes));
 }
