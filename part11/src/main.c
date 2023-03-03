@@ -41,6 +41,6 @@ int main(int argc, char** argv)
   // output
   printf("; %s\n", filepath);
 
-  for(int i=0; i<num_bytes; ++i)
-    printf("%02x ", bytes[i]);
+  for(int i=0; i < num_bytes; ++i)
+    decode_and_print(bytes, &i, num_bytes);
 }

@@ -33,3 +33,14 @@ struct Instr
   };
 };
 static_assert(sizeof(struct Instr) == 2);
+
+void decode_and_print(const uint8_t* instr, int* index, int num_bytes)
+{
+  if(*index + 1 > num_bytes)
+  {
+    fprintf(stderr, "invalid instr stream: last instr incomplete");
+    exit(1);
+  }
+
+  printf("%02x ", instr[*index]);
+}
