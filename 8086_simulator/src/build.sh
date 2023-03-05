@@ -1,0 +1,1 @@
+gcc -fshort-enums main.c -Wno-format-zero-length -o sim8086
