@@ -112,40 +112,31 @@ void instr_print(struct Instr instr)
     switch(mov.MOD)
     {
     case MOD_MEMORY_NO_DISPLACEMENT:
-    {
-      char buf[256];
-      static const char* addr_TABLE[] = {
-        "BX + SI", "BX + DI", "BP + SI", "BP + DI",
-        "SI", "DI", "", "BX",
-      };
-
-      const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
-      if(instr.mov_rm_r.R_M==6)
-        snprintf(buf, 256, "[%" PRIu16 "]", mov.displacement_u16);
-      else
-        snprintf(buf, 256, "[%s]", addr);
-      addr = buf;
-      const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
-      if(mov.D)
-        printf("mov %s, %s\n", reg, addr);
-      else
-        printf("mov %s, %s\n", addr, reg);
-      return;
-    }
     case MOD_MEMORY_8BIT_DISPLACEMENT:
     case MOD_MEMORY_16BIT_DISPLACEMENT:
     {
       char buf[256];
       static const char* addr_TABLE[] = {
-        "[BX + SI + %u]", "[BX + DI + %u]", "[BP + SI + %u]", "[BP + DI + %u]",
-        "[SI + %u]", "[DI + %u]", "[BP + %u]", "[BX + %u]",
+        "BX + SI", "BX + DI", "BP + SI", "BP + DI",
+        "SI", "DI", "BP", "BX",
       };
-      uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement_u16 : mov.displacement_u8;
+
       const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
-
-      snprintf(buf, 256, addr, displacement);
+      switch(mov.MOD)
+      {
+      case MOD_MEMORY_NO_DISPLACEMENT:
+        if(instr.mov_rm_r.R_M==6)
+          snprintf(buf, ARRAY_LEN(buf), "[%" PRIu16 "]", mov.displacement_u16);
+        else
+          snprintf(buf, ARRAY_LEN(buf), "[%s]", addr);
+        break;
+      case MOD_MEMORY_8BIT_DISPLACEMENT:
+      case MOD_MEMORY_16BIT_DISPLACEMENT:
+        uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement_u16 : mov.displacement_u8;
+        snprintf(buf, ARRAY_LEN(buf), "[%s + %u]", addr, displacement);
+        break;
+      }
       addr = buf;
-
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
       if(mov.D)
         printf("mov %s, %s\n", reg, addr);
