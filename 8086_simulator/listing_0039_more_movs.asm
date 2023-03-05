@@ -47,3 +47,6 @@ mov al, [bx + si + 4999]
 mov [bx + di], cx
 mov [bp + si], cl
 mov [bp], ch
+
+; (robert) added test for direct adressing
+mov bx, [1337]

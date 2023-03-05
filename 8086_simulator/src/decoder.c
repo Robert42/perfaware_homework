@@ -113,14 +113,18 @@ void instr_print(struct Instr instr)
     {
     case MOD_MEMORY_NO_DISPLACEMENT:
     {
+      char buf[256];
       static const char* addr_TABLE[] = {
         "[BX + SI]", "[BX + DI]", "[BP + SI]", "[BP + DI]",
-        "[SI]", "[DI]", "DIRECT_ACCESS", "[BX]",
+        "[SI]", "[DI]", "[%" PRIu16 "]", "[BX]",
       };
 
       const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
       if(instr.mov_rm_r.R_M==6)
-        UNIMPLEMENTED();
+      {
+        snprintf(buf, 256, addr, mov.displacement_u16);
+        addr = buf;
+      }
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
       const char *dest = addr, *src = reg;
       if(mov.D)
@@ -134,6 +138,7 @@ void instr_print(struct Instr instr)
     case MOD_MEMORY_8BIT_DISPLACEMENT:
     case MOD_MEMORY_16BIT_DISPLACEMENT:
     {
+      char buf[256];
       static const char* addr_TABLE[] = {
         "[BX + SI + %u]", "[BX + DI + %u]", "[BP + SI + %u]", "[BP + DI + %u]",
         "[SI + %u]", "[DI + %u]", "[BP + %u]", "[BX + %u]",
@@ -141,7 +146,6 @@ void instr_print(struct Instr instr)
       uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement_u16 : mov.displacement_u8;
       const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
 
-      char buf[256];
       snprintf(buf, 256, addr, displacement);
       addr = buf;
 
