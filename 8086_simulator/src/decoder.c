@@ -71,7 +71,6 @@ struct Instr
       uint8_t _padding : 3;
       uint8_t MOD : 2;
 
-
       union Payload p1;
       union Payload p2;
     } mov_im_rm;
@@ -129,8 +128,40 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
   return instr;
 }
 
+const char* fmt_addr(char* buf, enum Mod_Encoding mod, uint8_t R_M, union Payload displacement)
+{
+  static const char* const addr_TABLE[] = {
+    "BX + SI", "BX + DI", "BP + SI", "BP + DI",
+    "SI", "DI", "BP", "BX",
+  };
+
+  const char* addr = addr_TABLE[R_M];
+
+  ASSERT(mod != MOD_REGISTER);
+
+  switch(mod)
+  {
+  case MOD_MEMORY_NO_DISPLACEMENT:
+    if(R_M==6)
+      sprintf(buf, "[%" PRIu16 "]", displacement.u16);
+    else
+      sprintf(buf, "[%s]", addr);
+    return buf;
+  case MOD_MEMORY_8BIT_DISPLACEMENT:
+  case MOD_MEMORY_16BIT_DISPLACEMENT:
+    uint32_t displacement_val = mod==MOD_MEMORY_16BIT_DISPLACEMENT ? displacement.u16 : displacement.u8;
+    sprintf(buf, "[%s + %u]", addr, displacement_val);
+    return buf;
+  case MOD_REGISTER:
+    abort();
+  }
+
+  abort();
+}
+
 void instr_print(struct Instr instr)
 {
+
   switch(op(instr))
   {
   case OP_MOV_RM_R:
@@ -143,27 +174,7 @@ void instr_print(struct Instr instr)
     case MOD_MEMORY_16BIT_DISPLACEMENT:
     {
       char buf[256];
-      static const char* addr_TABLE[] = {
-        "BX + SI", "BX + DI", "BP + SI", "BP + DI",
-        "SI", "DI", "BP", "BX",
-      };
-
-      const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
-      switch(mov.MOD)
-      {
-      case MOD_MEMORY_NO_DISPLACEMENT:
-        if(instr.mov_rm_r.R_M==6)
-          snprintf(buf, ARRAY_LEN(buf), "[%" PRIu16 "]", mov.displacement.u16);
-        else
-          snprintf(buf, ARRAY_LEN(buf), "[%s]", addr);
-        break;
-      case MOD_MEMORY_8BIT_DISPLACEMENT:
-      case MOD_MEMORY_16BIT_DISPLACEMENT:
-        uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement.u16 : mov.displacement.u8;
-        snprintf(buf, ARRAY_LEN(buf), "[%s + %u]", addr, displacement);
-        break;
-      }
-      addr = buf;
+      const char* addr = fmt_addr(buf, mov.MOD, mov.R_M, mov.displacement);
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
       if(mov.D)
         printf("mov %s, %s\n", reg, addr);
@@ -184,7 +195,22 @@ void instr_print(struct Instr instr)
     }
     abort();
   }
-  case OP_MOV_IM_RM: UNIMPLEMENTED();
+  case OP_MOV_IM_RM:
+  {
+    const struct Mov_Im_Rm mov = instr.mov_im_rm;
+    switch(mov.MOD)
+    {
+    case MOD_MEMORY_NO_DISPLACEMENT:
+    case MOD_MEMORY_8BIT_DISPLACEMENT:
+    case MOD_MEMORY_16BIT_DISPLACEMENT:
+    {
+      UNIMPLEMENTED();
+    }
+    case MOD_REGISTER:
+      UNIMPLEMENTED();
+    }
+    abort();
+  }
   case OP_MOV_IM_R:
   {
     const struct Mov_Im_R mov = instr.mov_im_r;
@@ -210,7 +236,7 @@ static int instr_size(struct Instr instr)
     case MOD_REGISTER: return 2;
     }
     abort();
-  case OP_MOV_IM_RM: UNIMPLEMENTED();
+  case OP_MOV_IM_RM: return 4 + 2*(instr.mov_im_rm.R_M==6);
   case OP_MOV_IM_R: return instr.mov_im_r.W ? 3 : 2;
   }
   ASSERT(false, "Unknown opcode!");
