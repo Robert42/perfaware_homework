@@ -33,7 +33,7 @@ struct Instr
     {
       uint8_t bytes[2];
     };
-    struct
+    struct Mov_Rm_R
     {
       // == byte 0 == 
       // 0: byte operation
@@ -50,7 +50,7 @@ struct Instr
       uint8_t R_M : 3;
       uint8_t REG : 3;
       uint8_t MOD : 2;
-    };
+    } mov_rm_r;
   };
 };
 static_assert(sizeof(struct Instr) == 2);
@@ -80,26 +80,29 @@ void instr_print(struct Instr instr)
   switch(op(instr))
   {
   case OP_MOV_RM_R:
-    ASSERT(instr.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)instr.MOD);
-    switch(instr.MOD)
+  {
+    const struct Mov_Rm_R mov = instr.mov_rm_r;
+    ASSERT(mov.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)mov.MOD);
+    switch(mov.MOD)
     {
     case MOD_REGISTER:
     {
       enum Reg dest, src;
-      if(instr.D)
+      if(mov.D)
       {
-        dest = reg_decode(instr.W, instr.REG);
-        src = reg_decode(instr.W, instr.R_M);
+        dest = reg_decode(mov.W, mov.REG);
+        src = reg_decode(mov.W, mov.R_M);
       }else
       {
-        dest = reg_decode(instr.W, instr.R_M);
-        src = reg_decode(instr.W, instr.REG);
+        dest = reg_decode(mov.W, mov.R_M);
+        src = reg_decode(mov.W, mov.REG);
       }
       printf("mov %s, %s\n", reg_to_str(dest), reg_to_str(src));
       return;
     }
     }
     abort();
+  }
   case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
   case OP_MOV_IM_R: ASSERT(false, "UNIMPLEMENTED!");
   }
