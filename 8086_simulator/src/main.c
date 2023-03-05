@@ -8,8 +8,9 @@
 #define ASSERT(COND, ...) do { \
     if(!(COND)) \
     { \
+      fprintf(stderr, "==== ASSERT ====\n"); \
+      fprintf(stderr, "%s:%i\n", __FILE__, __LINE__); \
       fprintf(stderr, "" __VA_ARGS__); \
-      fprintf(stderr, "\n"); \
       exit(1); \
     } \
   } while(false)
