@@ -126,13 +126,10 @@ void instr_print(struct Instr instr)
         addr = buf;
       }
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
-      const char *dest = addr, *src = reg;
       if(mov.D)
-      {
-        dest = reg;
-        src = addr;
-      }
-      printf("mov %s, %s\n", dest, src);
+        printf("mov %s, %s\n", reg, addr);
+      else
+        printf("mov %s, %s\n", addr, reg);
       return;
     }
     case MOD_MEMORY_8BIT_DISPLACEMENT:
@@ -150,29 +147,20 @@ void instr_print(struct Instr instr)
       addr = buf;
 
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
-      const char *dest = addr, *src = reg;
       if(mov.D)
-      {
-        dest = reg;
-        src = addr;
-      }
-
-      printf("mov %s, %s\n", dest, src);
+        printf("mov %s, %s\n", reg, addr);
+      else
+        printf("mov %s, %s\n", addr, reg);
       return;
     }
     case MOD_REGISTER:
     {
-      enum Reg dest, src;
+      const char* REG = reg_to_str(reg_decode(mov.W, mov.REG));
+      const char* R_M = reg_to_str(reg_decode(mov.W, mov.R_M));
       if(mov.D)
-      {
-        dest = reg_decode(mov.W, mov.REG);
-        src = reg_decode(mov.W, mov.R_M);
-      }else
-      {
-        dest = reg_decode(mov.W, mov.R_M);
-        src = reg_decode(mov.W, mov.REG);
-      }
-      printf("mov %s, %s\n", reg_to_str(dest), reg_to_str(src));
+        printf("mov %s, %s\n", REG, R_M);
+      else
+        printf("mov %s, %s\n", R_M, REG);
       return;
     }
     }
