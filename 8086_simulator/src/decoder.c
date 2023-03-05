@@ -1,5 +1,6 @@
 struct Instr;
 
+// Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested in the comments of the course
 enum Op_Code
 {
   OP_MOV_RM_R = 0210 // 0b10_001_000 - Register/memory to/from register
