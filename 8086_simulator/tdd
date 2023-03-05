@@ -1,1 +1,1 @@
-find src -iname '*.c' | entr ./test.sh
+find src -iname '*.c' -or -iname '*.asm' | entr ./test.sh
