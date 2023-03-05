@@ -4,6 +4,14 @@ enum Op_Code
 };
 static_assert(sizeof(enum Op_Code) == 1);
 
+enum Reg
+{
+  AL, CL, DL, BL, AH, CH, DH, BH,
+  AX, CX, DX, BX, SP, BP, SI, DI,
+};
+static enum Reg reg_decode(bool W, uint8_t REG);
+static const char* reg_to_str(enum Reg reg);
+
 enum Mod_Encoding
 {
   MOD_REGISTER = 3, // 0b11 // Register mode (no displacement)
@@ -108,10 +116,7 @@ void instr_print(struct Instr instr)
     switch(instr.MOD)
     {
     case MOD_REGISTER:
-      reg_print(dest, instr.W);
-      printf(", ");
-      reg_print(src, instr.W);
-      printf("\n");
+      printf("%s, %s\n", reg_to_str(reg_decode(instr.W, dest)), reg_to_str(reg_decode(instr.W, src)));
       return;
     }
     abort();
@@ -126,4 +131,36 @@ static int instr_size(struct Instr instr)
   case OP_MOV: return 2;
   }
   ASSERT(false, "Unknown opcode!");
+}
+
+static enum Reg reg_decode(bool W, uint8_t REG)
+{
+  ASSERT(REG < 8);
+  ASSERT((uint8_t)W < 2);
+  return ((uint8_t)W << 3) | REG;
+}
+
+static const char* reg_to_str(enum Reg reg)
+{
+#define CASE(X) case X: return #X
+  switch(reg)
+  {
+    CASE(AL);
+    CASE(CL);
+    CASE(DL);
+    CASE(BL);
+    CASE(AH);
+    CASE(CH);
+    CASE(DH);
+    CASE(BH);
+    CASE(AX);
+    CASE(CX);
+    CASE(DX);
+    CASE(BX);
+    CASE(SP);
+    CASE(BP);
+    CASE(SI);
+    CASE(DI);
+  }
+#undef CASE
 }
