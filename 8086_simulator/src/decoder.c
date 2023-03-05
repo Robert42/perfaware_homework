@@ -28,6 +28,12 @@ enum Mod_Encoding
 };
 static_assert(sizeof(enum Mod_Encoding) == 1);
 
+union Payload
+{
+  uint8_t u8;
+  uint16_t u16;
+};
+
 struct Instr
 {
   union
@@ -54,11 +60,7 @@ struct Instr
       uint8_t REG : 3;
       uint8_t MOD : 2;
       
-      union
-      {
-        uint8_t displacement_u8;
-        uint16_t displacement_u16;
-      };
+      union Payload displacement;
     } mov_rm_r;
     struct __attribute__((packed)) Mov_Im_Rm
     {
@@ -70,16 +72,8 @@ struct Instr
       uint8_t MOD : 2;
 
 
-      union
-      {
-        struct
-        {
-          uint8_t displacement_u8;
-          uint16_t displacement_u16;
-        } with_displacement;
-      };
-
-
+      union Payload p1;
+      union Payload p2;
     } mov_im_rm;
     struct __attribute__((packed)) Mov_Im_R
     {
@@ -159,13 +153,13 @@ void instr_print(struct Instr instr)
       {
       case MOD_MEMORY_NO_DISPLACEMENT:
         if(instr.mov_rm_r.R_M==6)
-          snprintf(buf, ARRAY_LEN(buf), "[%" PRIu16 "]", mov.displacement_u16);
+          snprintf(buf, ARRAY_LEN(buf), "[%" PRIu16 "]", mov.displacement.u16);
         else
           snprintf(buf, ARRAY_LEN(buf), "[%s]", addr);
         break;
       case MOD_MEMORY_8BIT_DISPLACEMENT:
       case MOD_MEMORY_16BIT_DISPLACEMENT:
-        uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement_u16 : mov.displacement_u8;
+        uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement.u16 : mov.displacement.u8;
         snprintf(buf, ARRAY_LEN(buf), "[%s + %u]", addr, displacement);
         break;
       }
