@@ -3,7 +3,9 @@ struct Instr;
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
 enum Op_Code
 {
-  OP_MOV_RM_R = 0210 // 0b10_001_000 - Register/memory to/from register
+  OP_MOV_RM_R  = 0210, // 0b10_001_0xx - Register/memory to/from register
+  OP_MOV_IM_RM = 0306, // 0b11_000_11x - Immediate to register/memory
+  OP_MOV_IM_R  = 0260, // 0b10_11x_xxx - Immediate to register
 };
 static_assert(sizeof(enum Op_Code) == 1);
 
@@ -98,6 +100,8 @@ void instr_print(struct Instr instr)
     }
     }
     abort();
+  case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_IM_R: ASSERT(false, "UNIMPLEMENTED!");
   }
   abort();
 }
@@ -107,6 +111,8 @@ static int instr_size(struct Instr instr)
   switch(op(instr))
   {
   case OP_MOV_RM_R: return 2;
+  case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_IM_R: ASSERT(false, "UNIMPLEMENTED!");
   }
   ASSERT(false, "Unknown opcode!");
 }
@@ -141,13 +147,24 @@ static const char* reg_to_str(enum Reg reg)
     CASE(DI);
   }
 #undef CASE
+  abort();
 }
 
 enum Op_Code op(struct Instr instr)
 {
+  switch(instr.bytes[0] & 0xfe)
+  {
+  case OP_MOV_IM_RM: return OP_MOV_IM_RM;
+  }
+
   switch(instr.bytes[0] & 0xfc)
   {
   case OP_MOV_RM_R: return OP_MOV_RM_R;
+  }
+
+  switch(instr.bytes[0] & 0xf0)
+  {
+  case OP_MOV_IM_R: return OP_MOV_IM_R;
   }
 
   ASSERT(false, "Could not decode opcode from byte: 0o%03o", (uint32_t)instr.bytes[0]);
