@@ -152,20 +152,22 @@ static const char* reg_to_str(enum Reg reg)
 
 enum Op_Code op(struct Instr instr)
 {
+#define CASE(X) case X: return X
   switch(instr.bytes[0] & 0xfe)
   {
-  case OP_MOV_IM_RM: return OP_MOV_IM_RM;
+  CASE(OP_MOV_IM_RM);
   }
 
   switch(instr.bytes[0] & 0xfc)
   {
-  case OP_MOV_RM_R: return OP_MOV_RM_R;
+  CASE(OP_MOV_RM_R);
   }
 
   switch(instr.bytes[0] & 0xf0)
   {
-  case OP_MOV_IM_R: return OP_MOV_IM_R;
+  CASE(OP_MOV_IM_R);
   }
 
   ASSERT(false, "Could not decode opcode from byte: 0o%03o", (uint32_t)instr.bytes[0]);
+#undef CASE
 }
