@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,11 +9,16 @@
 #define ASSERT(COND, ...) do { \
     if(!(COND)) \
     { \
+      fprintf(stderr, "==== ASSERT ====\n"); \
+      fprintf(stderr, "%s:%i\n", __FILE__, __LINE__); \
       fprintf(stderr, "" __VA_ARGS__); \
       fprintf(stderr, "\n"); \
       exit(1); \
     } \
   } while(false)
+#define UNIMPLEMENTED(...) ASSERT(false, "UNIMPLEMENTED!\n" __VA_ARGS__)
+
+#define ARRAY_LEN(X) (sizeof(X) / sizeof(X[0]))
 
 #include "decoder.c"
 
