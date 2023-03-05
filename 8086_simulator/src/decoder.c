@@ -31,7 +31,7 @@ struct Instr
   {
     struct
     {
-      uint8_t bytes[2];
+      uint8_t bytes[3];
     };
     struct Mov_Rm_R
     {
@@ -51,9 +51,27 @@ struct Instr
       uint8_t REG : 3;
       uint8_t MOD : 2;
     } mov_rm_r;
+    struct __attribute__((packed)) Mov_Im_R
+    {
+      uint8_t REG : 3;
+      bool W : 1;
+      uint8_t _opcode : 4; // OP_MOV_IM_R
+
+      // == byte 1 ==
+      union
+      {
+        struct
+        {
+          uint8_t data_lo;
+          uint8_t data_hi;
+        };
+        uint16_t data;
+      };
+    } mov_im_r;
   };
 };
-static_assert(sizeof(struct Instr) == 2);
+static_assert(sizeof(struct Mov_Rm_R) == 2);
+static_assert(sizeof(struct Mov_Im_R) == 3);
 
 static int instr_size(struct Instr instr);
 
@@ -104,7 +122,14 @@ void instr_print(struct Instr instr)
     abort();
   }
   case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
-  case OP_MOV_IM_R: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_IM_R:
+  {
+    const struct Mov_Im_R mov = instr.mov_im_r;
+    const enum Reg reg = reg_decode(mov.W, mov.REG);
+    const uint32_t data = mov.W ? mov.data : mov.data_lo;
+    printf("mov %s, %u\n", reg_to_str(reg), (uint32_t)data);
+    return;
+  }
   }
   abort();
 }
@@ -115,7 +140,7 @@ static int instr_size(struct Instr instr)
   {
   case OP_MOV_RM_R: return 2;
   case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
-  case OP_MOV_IM_R: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_IM_R: return instr.mov_im_r.W ? 3 : 2;
   }
   ASSERT(false, "Unknown opcode!");
 }
