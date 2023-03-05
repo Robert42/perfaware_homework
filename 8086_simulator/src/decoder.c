@@ -1,9 +1,12 @@
+struct Instr;
+
 enum Op_Code
 {
-  OP_MOV_RM_R = 042 // 0b100010 - Register/memory to/from register
-
+  OP_MOV_RM_R = 0210 // 0b10_001_000 - Register/memory to/from register
 };
 static_assert(sizeof(enum Op_Code) == 1);
+
+enum Op_Code op(struct Instr);
 
 enum Reg
 {
@@ -37,8 +40,8 @@ struct Instr
       // 0: src is specified in REG field.
       // 1: dest is specified in REG field.
       bool D : 1;
-      
-      enum Op_Code opcode : 6;
+
+      uint8_t _opcode : 6; // OP_MOV_RM_R
 
       // == byte 1 ==
       uint8_t R_M : 3;
@@ -66,18 +69,15 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
     *index += size;
   }
 
-  // ==== compatibility checks ====
-  ASSERT(instr.opcode == OP_MOV_RM_R, "Unsupported obcode: 0x%02X (at index %i)", (uint32_t)instr.opcode, *index);
-  ASSERT(instr.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)instr.MOD);
-
   return instr;
 }
 
 void instr_print(struct Instr instr)
 {
-  switch(instr.opcode)
+  switch(op(instr))
   {
   case OP_MOV_RM_R:
+    ASSERT(instr.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)instr.MOD);
     switch(instr.MOD)
     {
     case MOD_REGISTER:
@@ -103,7 +103,7 @@ void instr_print(struct Instr instr)
 
 static int instr_size(struct Instr instr)
 {
-  switch(instr.opcode)
+  switch(op(instr))
   {
   case OP_MOV_RM_R: return 2;
   }
@@ -140,4 +140,14 @@ static const char* reg_to_str(enum Reg reg)
     CASE(DI);
   }
 #undef CASE
+}
+
+enum Op_Code op(struct Instr instr)
+{
+  switch(instr.bytes[0] & 0xfc)
+  {
+  case OP_MOV_RM_R: return OP_MOV_RM_R;
+  }
+
+  ASSERT(false, "Could not decodeopcode from byte: 0x%02X", (uint32_t)instr.bytes[0]);
 }
