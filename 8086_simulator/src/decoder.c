@@ -149,5 +149,5 @@ enum Op_Code op(struct Instr instr)
   case OP_MOV_RM_R: return OP_MOV_RM_R;
   }
 
-  ASSERT(false, "Could not decodeopcode from byte: 0x%02X", (uint32_t)instr.bytes[0]);
+  ASSERT(false, "Could not decode opcode from byte: 0x%03o", (uint32_t)instr.bytes[0]);
 }
