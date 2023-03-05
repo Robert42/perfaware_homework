@@ -34,7 +34,7 @@ struct Instr
   {
     struct
     {
-      uint8_t bytes[3];
+      uint8_t bytes[6];
     };
     struct __attribute__((packed)) Mov_Rm_R
     {
@@ -60,6 +60,27 @@ struct Instr
         uint16_t displacement_u16;
       };
     } mov_rm_r;
+    struct __attribute__((packed)) Mov_Im_Rm
+    {
+      bool W : 1;
+      uint8_t _opcode : 7; // OP_MOV_IM_RM
+
+      uint8_t R_M : 3;
+      uint8_t _padding : 3;
+      uint8_t MOD : 2;
+
+
+      union
+      {
+        struct
+        {
+          uint8_t displacement_u8;
+          uint16_t displacement_u16;
+        } with_displacement;
+      };
+
+
+    } mov_im_rm;
     struct __attribute__((packed)) Mov_Im_R
     {
       uint8_t REG : 3;
@@ -80,6 +101,7 @@ struct Instr
   };
 };
 static_assert(sizeof(struct Mov_Rm_R) == 4);
+static_assert(sizeof(struct Mov_Im_Rm) == 6);
 static_assert(sizeof(struct Mov_Im_R) == 3);
 
 static int instr_size(struct Instr instr);
