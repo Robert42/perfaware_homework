@@ -88,6 +88,9 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
 {
   ASSERT(*index + 1 <= num_bytes, "no more instructions to decode!");
 
+  if(LOG)
+    fprintf(stderr, "%4i | %02X ", *index, instr_stream[0]);
+
   // ==== read instr ====
   struct Instr instr = {};
   memcpy(&instr, instr_stream + *index, sizeof(struct Instr)); // I've made the buffer sizeof(struct Instr) bytes bigger tan necessary, so I can always copy sizeof(struct Instr) bytes without further checks
@@ -95,6 +98,14 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
   // ==== increment the index ====
   {
     const int size = instr_size(instr);
+
+    if(LOG)
+    {
+      for(int i=1; i<size; ++i)
+        fprintf(stderr, "%02X ", instr_stream[*index+i]);
+      fprintf(stderr, "\n");
+    }
+
     ASSERT(*index + size <= num_bytes, "invalid instr stream: last instr incomplete!");
     *index += size;
   }
@@ -240,6 +251,6 @@ enum Op_Code op(struct Instr instr)
   CASE(OP_MOV_IM_R);
   }
 
-  ASSERT(false, "Could not decode opcode from byte: 0o%03o", (uint32_t)instr.bytes[0]);
+  ASSERT(false, "Could not decode opcode from byte: 0o%03o  0x%02X", (uint32_t)instr.bytes[0], (uint32_t)instr.bytes[0]);
 #undef CASE
 }

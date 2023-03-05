@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool LOG = false;
+
 #define ASSERT(COND, ...) do { \
     if(!(COND)) \
     { \
@@ -32,6 +34,10 @@ int main(int argc, char** argv)
   const char* const program = argv[0];
   ASSERT(argc == 2, "usage: %s [FILE]\n", program);
   const char* const filepath = argv[1];
+
+  LOG = strstr(filepath, "0040");
+  if(LOG)
+    fprintf(stderr, "==== %s ====\n", filepath);
 
   // read file
   {
