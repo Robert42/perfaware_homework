@@ -1,6 +1,7 @@
 enum Op_Code
 {
-  OP_MOV = 042 // 0b100010
+  OP_MOV_RM_R = 042 // 0b100010 - Register/memory to/from register
+
 };
 static_assert(sizeof(enum Op_Code) == 1);
 
@@ -66,7 +67,7 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
   }
 
   // ==== compatibility checks ====
-  ASSERT(instr.opcode == OP_MOV, "Unsupported obcode: 0x%02X (at index %i)", (uint32_t)instr.opcode, *index);
+  ASSERT(instr.opcode == OP_MOV_RM_R, "Unsupported obcode: 0x%02X (at index %i)", (uint32_t)instr.opcode, *index);
   ASSERT(instr.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)instr.MOD);
 
   return instr;
@@ -74,25 +75,26 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
 
 void instr_print(struct Instr instr)
 {
-  uint8_t dest, src;
-  if(instr.D)
-  {
-    dest = reg_decode(instr.W, instr.REG);
-    src = reg_decode(instr.W, instr.R_M);
-  }else
-  {
-    dest = reg_decode(instr.W, instr.R_M);
-    src = reg_decode(instr.W, instr.REG);
-  }
-
   switch(instr.opcode)
   {
-  case OP_MOV:
+  case OP_MOV_RM_R:
     switch(instr.MOD)
     {
     case MOD_REGISTER:
+    {
+      enum Reg dest, src;
+      if(instr.D)
+      {
+        dest = reg_decode(instr.W, instr.REG);
+        src = reg_decode(instr.W, instr.R_M);
+      }else
+      {
+        dest = reg_decode(instr.W, instr.R_M);
+        src = reg_decode(instr.W, instr.REG);
+      }
       printf("mov %s, %s\n", reg_to_str(dest), reg_to_str(src));
       return;
+    }
     }
     abort();
   }
@@ -103,7 +105,7 @@ static int instr_size(struct Instr instr)
 {
   switch(instr.opcode)
   {
-  case OP_MOV: return 2;
+  case OP_MOV_RM_R: return 2;
   }
   ASSERT(false, "Unknown opcode!");
 }
