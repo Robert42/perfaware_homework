@@ -72,51 +72,26 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
   return instr;
 }
 
-void reg_print(uint8_t reg, bool W)
-{
-  reg |= (uint8_t)W << 3;
-
-  char x, y;
-
-  if(reg < 12)
-  {
-    const char NAME[] = "acdb";
-    const char PART[] = "lhx";
-
-    x = NAME[reg%4];
-    y = PART[reg / 4];
-  }else
-  {
-    const char REG[] = "spbpsidi";
-    const int i = 2*(reg-12);
-    x = REG[i];
-    y = REG[i+1];
-  }
-
-  printf("%c%c", x, y);
-}
-
 void instr_print(struct Instr instr)
 {
   uint8_t dest, src;
   if(instr.D)
   {
-    dest = instr.REG;
-    src = instr.R_M;
+    dest = reg_decode(instr.W, instr.REG);
+    src = reg_decode(instr.W, instr.R_M);
   }else
   {
-    dest = instr.R_M;
-    src = instr.REG;
+    dest = reg_decode(instr.W, instr.R_M);
+    src = reg_decode(instr.W, instr.REG);
   }
 
   switch(instr.opcode)
   {
   case OP_MOV:
-    printf("mov ");
     switch(instr.MOD)
     {
     case MOD_REGISTER:
-      printf("%s, %s\n", reg_to_str(reg_decode(instr.W, dest)), reg_to_str(reg_decode(instr.W, src)));
+      printf("mov %s, %s\n", reg_to_str(dest), reg_to_str(src));
       return;
     }
     abort();
