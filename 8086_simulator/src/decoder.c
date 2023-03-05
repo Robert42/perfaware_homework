@@ -21,6 +21,9 @@ static const char* reg_to_str(enum Reg reg);
 
 enum Mod_Encoding
 {
+  MOD_MEMORY_NO_DISPLACEMENT = 0, // except if R/M==6
+  MOD_MEMORY_8BIT_DISPLACEMENT = 1, // 
+  MOD_MEMORY_16BIT_DISPLACEMENT = 2, // 
   MOD_REGISTER = 3, // 0b11 // Register mode (no displacement)
 };
 static_assert(sizeof(enum Mod_Encoding) == 1);
@@ -33,7 +36,7 @@ struct Instr
     {
       uint8_t bytes[3];
     };
-    struct Mov_Rm_R
+    struct __attribute__((packed)) Mov_Rm_R
     {
       // == byte 0 == 
       // 0: byte operation
@@ -50,6 +53,12 @@ struct Instr
       uint8_t R_M : 3;
       uint8_t REG : 3;
       uint8_t MOD : 2;
+      
+      union
+      {
+        uint8_t displacement_u8;
+        uint16_t displacement_u16;
+      };
     } mov_rm_r;
     struct __attribute__((packed)) Mov_Im_R
     {
@@ -70,7 +79,7 @@ struct Instr
     } mov_im_r;
   };
 };
-static_assert(sizeof(struct Mov_Rm_R) == 2);
+static_assert(sizeof(struct Mov_Rm_R) == 4);
 static_assert(sizeof(struct Mov_Im_R) == 3);
 
 static int instr_size(struct Instr instr);
@@ -100,9 +109,53 @@ void instr_print(struct Instr instr)
   case OP_MOV_RM_R:
   {
     const struct Mov_Rm_R mov = instr.mov_rm_r;
-    ASSERT(mov.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)mov.MOD);
     switch(mov.MOD)
     {
+    case MOD_MEMORY_NO_DISPLACEMENT:
+    {
+      static const char* addr_TABLE[] = {
+        "[BX + SI]", "[BX + DI]", "[BP + SI]", "[BP + DI]",
+        "[SI]", "[DI]", "DIRECT_ACCESS", "[BX]",
+      };
+
+      const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
+      if(instr.mov_rm_r.R_M==6)
+        UNIMPLEMENTED();
+      const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
+      const char *dest = addr, *src = reg;
+      if(mov.D)
+      {
+        dest = reg;
+        src = addr;
+      }
+      printf("mov %s, %s\n", dest, src);
+      return;
+    }
+    case MOD_MEMORY_8BIT_DISPLACEMENT:
+    case MOD_MEMORY_16BIT_DISPLACEMENT:
+    {
+      static const char* addr_TABLE[] = {
+        "[BX + SI + %u]", "[BX + DI + %u]", "[BP + SI + %u]", "[BP + DI + %u]",
+        "[SI + %u]", "[DI + %u]", "[BP + %u]", "[BX + %u]",
+      };
+      uint32_t displacement = mov.MOD==MOD_MEMORY_16BIT_DISPLACEMENT ? mov.displacement_u16 : mov.displacement_u8;
+      const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
+
+      char buf[256];
+      snprintf(buf, 256, addr, displacement);
+      addr = buf;
+
+      const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
+      const char *dest = addr, *src = reg;
+      if(mov.D)
+      {
+        dest = reg;
+        src = addr;
+      }
+
+      printf("mov %s, %s\n", dest, src);
+      return;
+    }
     case MOD_REGISTER:
     {
       enum Reg dest, src;
@@ -121,7 +174,7 @@ void instr_print(struct Instr instr)
     }
     abort();
   }
-  case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_IM_RM: UNIMPLEMENTED();
   case OP_MOV_IM_R:
   {
     const struct Mov_Im_R mov = instr.mov_im_r;
@@ -138,8 +191,16 @@ static int instr_size(struct Instr instr)
 {
   switch(op(instr))
   {
-  case OP_MOV_RM_R: return 2;
-  case OP_MOV_IM_RM: ASSERT(false, "UNIMPLEMENTED!");
+  case OP_MOV_RM_R:
+    switch(instr.mov_rm_r.MOD)
+    {
+    case MOD_MEMORY_NO_DISPLACEMENT: return 2 + 2*(instr.mov_rm_r.R_M==6);
+    case MOD_MEMORY_8BIT_DISPLACEMENT: return 3;
+    case MOD_MEMORY_16BIT_DISPLACEMENT: return 4;
+    case MOD_REGISTER: return 2;
+    }
+    abort();
+  case OP_MOV_IM_RM: UNIMPLEMENTED();
   case OP_MOV_IM_R: return instr.mov_im_r.W ? 3 : 2;
   }
   ASSERT(false, "Unknown opcode!");

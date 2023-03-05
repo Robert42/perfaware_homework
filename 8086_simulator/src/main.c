@@ -15,6 +15,7 @@
       exit(1); \
     } \
   } while(false)
+#define UNIMPLEMENTED(...) ASSERT(false, "UNIMPLEMENTED!\n" __VA_ARGS__)
 
 #include "decoder.c"
 
