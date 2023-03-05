@@ -40,21 +40,23 @@ struct Instr
 };
 static_assert(sizeof(struct Instr) == 2);
 
+static int instr_size(struct Instr instr);
+
 struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
 {
-  struct Instr instr = {};
+  ASSERT(*index + 1 <= num_bytes, "end reached!");
 
   // ==== read instr ====
-  ASSERT(*index + 1 <= num_bytes, "invalid instr stream: last instr incomplete");
-  memcpy(&instr, instr_stream + *index, 1);
+  struct Instr instr = {};
+  memcpy(&instr, instr_stream + *index, sizeof(struct Instr)); // I've made the buffer sizeof(struct Instr) bytes bigger tan necessary, so I can always copy sizeof(struct Instr) bytes without further checks
+
+  {
+    const int size = instr_size(instr);
+    ASSERT(*index + size <= num_bytes, "invalid instr stream: last instr incomplete!");
+    *index += size;
+  }
+
   ASSERT(instr.opcode == OP_MOV, "Unsupported obcode: 0x%02X (at index %i)", (uint32_t)instr.opcode, *index);
-  *index += 1;
-
-  ASSERT(*index + 1 <= num_bytes, "invalid instr stream: last instr incomplete");
-  memcpy(1 + (uint8_t*)&instr, instr_stream + *index, 1);
-  *index += 1;
-
-  // if the mode was something else, I would need to decode more bytes
   ASSERT(instr.MOD == MOD_REGISTER, "Unsupported Mode: 0x%02X", (uint32_t)instr.MOD);
 
   return instr;
@@ -113,4 +115,13 @@ void instr_print(struct Instr instr)
     abort();
   }
   abort();
+}
+
+static int instr_size(struct Instr instr)
+{
+  switch(instr.opcode)
+  {
+  case OP_MOV: return 2;
+  }
+  ASSERT(false, "Unknown opcode!");
 }
