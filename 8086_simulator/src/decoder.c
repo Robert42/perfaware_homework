@@ -115,16 +115,16 @@ void instr_print(struct Instr instr)
     {
       char buf[256];
       static const char* addr_TABLE[] = {
-        "[BX + SI]", "[BX + DI]", "[BP + SI]", "[BP + DI]",
-        "[SI]", "[DI]", "[%" PRIu16 "]", "[BX]",
+        "BX + SI", "BX + DI", "BP + SI", "BP + DI",
+        "SI", "DI", "", "BX",
       };
 
       const char* addr = addr_TABLE[instr.mov_rm_r.R_M];
       if(instr.mov_rm_r.R_M==6)
-      {
-        snprintf(buf, 256, addr, mov.displacement_u16);
-        addr = buf;
-      }
+        snprintf(buf, 256, "[%" PRIu16 "]", mov.displacement_u16);
+      else
+        snprintf(buf, 256, "[%s]", addr);
+      addr = buf;
       const char* reg = reg_to_str(reg_decode(mov.W, mov.REG));
       if(mov.D)
         printf("mov %s, %s\n", reg, addr);
