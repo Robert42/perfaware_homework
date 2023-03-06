@@ -10,6 +10,40 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   
   struct Instr instr = {};
 
+  switch(bytes[0] & 0xfe)
+  {
+  case 0306: // Immediate to register/memory
+  {
+    instr.op = MOV;
+
+    const bool W = bytes[0] & 1;
+
+    bytes[1] = read_u8(byte_stream);
+    const uint8_t mod = (bytes[1] & 0300) >> 6;
+    const uint8_t r_m = bytes[1] & 0007;
+
+    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
+    instr.src = op_im(W, read_payload(W, byte_stream));
+    return instr;
+  }
+  case 0240: // Memory to accumulator
+  case 0242: // Accumulator to memory
+  {
+    const bool acc_to_mem = (bytes[0] & 0xfe) == 0242;
+    instr.op = MOV;
+
+    const bool W = bytes[0] & 1;
+    ASSERT(W, "what does it write to when not wide? AL?");
+    instr.dest = op_reg(W, AL);
+    instr.src = op_im(W, read_payload(W, byte_stream));
+
+    if(acc_to_mem)
+      op_swap(&instr.dest, &instr.src);
+
+    return instr;
+  }
+  }
+
   switch(bytes[0] & 0xfc)
   {
   case 0210: // Register/memory to/from register
