@@ -195,9 +195,9 @@ void instr_print(struct Instr instr)
   case OP_MOV_IM_R:
   {
     const struct Mov_Im_R mov = instr.mov_im_r;
-    const enum Reg reg = reg_decode(mov.W, mov.REG);
+    const struct Operand dest = op_reg(mov.W, mov.REG);
     const uint32_t data = mov.W ? mov.data : mov.data_lo;
-    printf("mov %s, %u\n", reg_to_str(reg), (uint32_t)data);
+    printf("mov %s, %u\n", fmt_operand(dest), (uint32_t)data);
     return;
   }
   }
