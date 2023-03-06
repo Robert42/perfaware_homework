@@ -33,3 +33,13 @@ uint8_t read_u16(struct Byte_Stream* s)
   read_bytes(&x, sizeof(x), s);
   return x;
 }
+
+union Payload read_payload(bool wide, struct Byte_Stream* s)
+{
+  union Payload data = {};
+  if(wide)
+    data.wide = read_u16(s);
+  else
+    data.lo = read_u8(s);
+  return data;
+}

@@ -7,10 +7,25 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   bytes[0] = read_u8(byte_stream);
   
   struct Instr instr = {};
+  
+  switch(bytes[0] & 0xf0)
+  {
+  case 0260: // Immediate to register
+  {
+    const bool W = bytes[0] & 0010;
+    const uint8_t reg = bytes[0] & 0007;
+
+    const union Payload data = read_payload(W, byte_stream);
+
+    instr.dest = op_reg(W, reg);
+    instr.src = op_im(W, data);
+    return instr;
+  }
+  }
 
   switch(bytes[0] & 0xfc)
   {
-  case 0210:
+  case 0210: // Register/memory to/from register
   {
     instr.op = MOV;
 
@@ -31,5 +46,5 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
   }
 
-  UNIMPLEMENTED();
+  UNIMPLEMENTED("%03o", bytes[0]);
 }
