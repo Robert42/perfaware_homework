@@ -121,9 +121,9 @@ struct Operand op_addr(enum Mod_Encoding mod, uint8_t R_M, union Payload displac
     else
       return op_addr_expr(R_M);
   case MOD_MEMORY_8BIT_DISPLACEMENT:
+    return op_addr_expr_with_displacement(R_M, false, displacement);
   case MOD_MEMORY_16BIT_DISPLACEMENT:
-    bool wide = mod==MOD_MEMORY_16BIT_DISPLACEMENT;
-    return op_addr_expr_with_displacement(R_M, wide, displacement);
+    return op_addr_expr_with_displacement(R_M, true, displacement);
   case MOD_REGISTER:
     abort();
   }
