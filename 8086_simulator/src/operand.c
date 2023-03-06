@@ -60,16 +60,21 @@ const char* fmt_operand(struct Operand op)
   {
   case OPERAND_REG:
     return reg_to_str(op.reg);
-  case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); return text;
-  case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); return text;
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.lo); return text;
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.wide); return text;
-  case OPERAND_IMMEDIATE_8: sprintf(text, "%" PRIu8, op.payload.lo); return text;
-  case OPERAND_IMMEDIATE_16: sprintf(text, "%" PRIu16, op.payload.wide); return text;
+  case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
+  case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); goto done;
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.lo); goto done;
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.wide); goto done;
+  case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
+  case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
   case OPERAND_COUNT: abort();
   }
 
   abort();
+
+done:
+  START += strlen(text)+1;
+  ASSERT(START < ARRAY_LEN(RING_BUFFER));
+  return text;
 }
 
 void op_swap(struct Operand* x, struct Operand* y)
