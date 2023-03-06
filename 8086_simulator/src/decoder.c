@@ -11,14 +11,6 @@ static_assert(sizeof(enum Op_Code) == 1);
 
 enum Op_Code op(struct Instr);
 
-enum Reg
-{
-  AL, CL, DL, BL, AH, CH, DH, BH,
-  AX, CX, DX, BX, SP, BP, SI, DI,
-};
-static enum Reg reg_decode(bool W, uint8_t REG);
-static const char* reg_to_str(enum Reg reg);
-
 enum Mod_Encoding
 {
   MOD_MEMORY_NO_DISPLACEMENT = 0, // except if R/M==6
@@ -240,39 +232,6 @@ static int instr_size(struct Instr instr)
   case OP_MOV_IM_R: return instr.mov_im_r.W ? 3 : 2;
   }
   ASSERT(false, "Unknown opcode!");
-}
-
-static enum Reg reg_decode(bool W, uint8_t REG)
-{
-  ASSERT(REG < 8);
-  ASSERT((uint8_t)W < 2);
-  return ((uint8_t)W << 3) | REG;
-}
-
-static const char* reg_to_str(enum Reg reg)
-{
-#define CASE(X) case X: return #X
-  switch(reg)
-  {
-    CASE(AL);
-    CASE(CL);
-    CASE(DL);
-    CASE(BL);
-    CASE(AH);
-    CASE(CH);
-    CASE(DH);
-    CASE(BH);
-    CASE(AX);
-    CASE(CX);
-    CASE(DX);
-    CASE(BX);
-    CASE(SP);
-    CASE(BP);
-    CASE(SI);
-    CASE(DI);
-  }
-#undef CASE
-  abort();
 }
 
 enum Op_Code op(struct Instr instr)

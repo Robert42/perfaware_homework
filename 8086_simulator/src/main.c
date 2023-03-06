@@ -22,6 +22,9 @@ bool LOG = false;
 
 #define ARRAY_LEN(X) (sizeof(X) / sizeof(X[0]))
 
+#include "operand.h"
+
+#include "operand.c"
 #include "decoder.c"
 
 #define BUF_SIZE 4096

@@ -1,0 +1,7 @@
+enum Reg
+{
+  AL, CL, DL, BL, AH, CH, DH, BH,
+  AX, CX, DX, BX, SP, BP, SI, DI,
+};
+static enum Reg reg_decode(bool W, uint8_t REG);
+static const char* reg_to_str(enum Reg reg);
