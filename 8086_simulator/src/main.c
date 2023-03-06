@@ -22,6 +22,7 @@ bool LOG = false;
 
 #define ARRAY_LEN(X) (sizeof(X) / sizeof(X[0]))
 
+#include "byte_stream.h"
 #include "operand.h"
 #include "instr.h"
 
