@@ -1,4 +1,4 @@
-struct Instr;
+struct Decoder;
 
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
 enum Op_Code
@@ -9,7 +9,7 @@ enum Op_Code
 };
 static_assert(sizeof(enum Op_Code) == 1);
 
-enum Op_Code op(struct Instr);
+enum Op_Code op(struct Decoder);
 
 enum Mod_Encoding
 {
@@ -20,7 +20,7 @@ enum Mod_Encoding
 };
 static_assert(sizeof(enum Mod_Encoding) == 1);
 
-struct Instr
+struct Decoder
 {
   union
   {
@@ -75,11 +75,11 @@ static_assert(sizeof(struct Mov_Rm_R) == 4);
 static_assert(sizeof(struct Mov_Im_Rm) == 6);
 static_assert(sizeof(struct Mov_Im_R) == 3);
 
-#define MAX_INSTR_LEN sizeof(struct Instr)
+#define MAX_INSTR_LEN sizeof(struct Decoder)
 
-static int instr_size(struct Instr instr);
+static int instr_size(struct Decoder instr);
 
-struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
+struct Decoder instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
 {
   ASSERT(*index + 1 <= num_bytes, "no more instructions to decode!");
 
@@ -87,7 +87,7 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
     fprintf(stderr, "%4i | %02X ", *index, instr_stream[0]);
 
   // ==== read instr ====
-  struct Instr instr = {};
+  struct Decoder instr = {};
   memcpy(&instr, instr_stream + *index, MAX_INSTR_LEN); // I've made the buffer is MAX_INSTR_LEN bytes bigger than necessary, so I can always copy MAX_INSTR_LEN bytes without further checks
 
   // ==== increment the index ====
@@ -130,7 +130,7 @@ struct Operand op_addr(enum Mod_Encoding mod, uint8_t R_M, union Payload displac
   abort();
 }
 
-void instr_print(struct Instr instr)
+void instr_print(struct Decoder instr)
 {
 
   switch(op(instr))
@@ -191,7 +191,7 @@ void instr_print(struct Instr instr)
   abort();
 }
 
-static int instr_size(struct Instr instr)
+static int instr_size(struct Decoder instr)
 {
   switch(op(instr))
   {
@@ -210,7 +210,7 @@ static int instr_size(struct Instr instr)
   ASSERT(false, "Unknown opcode!");
 }
 
-enum Op_Code op(struct Instr instr)
+enum Op_Code op(struct Decoder instr)
 {
 #define CASE(X) case X: return X
   switch(instr.bytes[0] & 0xfe)
