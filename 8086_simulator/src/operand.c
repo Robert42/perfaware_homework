@@ -60,12 +60,12 @@ const char* fmt_operand(struct Operand op)
   {
   case OPERAND_REG:
     return reg_to_str(op.reg);
-  case OPERAND_ADDR_DIRECT:
-  case OPERAND_ADDR_EXPR: UNIMPLEMENTED();
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: UNIMPLEMENTED();
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: UNIMPLEMENTED();
-  case OPERAND_IMMEDIATE_8: sprintf(text, "%" PRIu8, op.value.lo); return text;
-  case OPERAND_IMMEDIATE_16: sprintf(text, "%" PRIu16, op.value.wide); return text;
+  case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); return text;
+  case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); return text;
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.lo); return text;
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.wide); return text;
+  case OPERAND_IMMEDIATE_8: sprintf(text, "%" PRIu8, op.payload.lo); return text;
+  case OPERAND_IMMEDIATE_16: sprintf(text, "%" PRIu16, op.payload.wide); return text;
   case OPERAND_COUNT: abort();
   }
 
@@ -91,6 +91,31 @@ struct Operand op_im(bool W, union Payload payload)
 {
   return (struct Operand){
     .variant = W ? OPERAND_IMMEDIATE_16 : OPERAND_IMMEDIATE_8,
-    .value = payload,
+    .payload = payload,
+  };
+}
+
+struct Operand op_addr_direct(uint16_t addr)
+{
+  return (struct Operand){
+    .variant = OPERAND_ADDR_DIRECT,
+    .payload.wide = addr,
+  };
+}
+
+struct Operand op_addr_expr(enum Addr_Expr addr_expr)
+{
+  return (struct Operand){
+    .variant = OPERAND_ADDR_EXPR,
+    .addr_expr = addr_expr,
+  };
+}
+
+struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, bool W, union Payload displacement)
+{
+  return (struct Operand){
+    .variant = W ? OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16 : OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8,
+    .addr_expr = addr_expr,
+    .payload = displacement,
   };
 }

@@ -108,22 +108,20 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
 
 const char* fmt_addr(char* buf, enum Mod_Encoding mod, uint8_t R_M, union Payload displacement)
 {
-  const char* addr = addr_expr_to_str(R_M);
-
   ASSERT(mod != MOD_REGISTER);
 
   switch(mod)
   {
   case MOD_MEMORY_NO_DISPLACEMENT:
     if(R_M==6)
-      sprintf(buf, "[%" PRIu16 "]", displacement.wide);
+      sprintf(buf, "%s", fmt_operand(op_addr_direct(displacement.wide)));
     else
-      sprintf(buf, "[%s]", addr);
+      sprintf(buf, "%s", fmt_operand(op_addr_expr(R_M)));
     return buf;
   case MOD_MEMORY_8BIT_DISPLACEMENT:
   case MOD_MEMORY_16BIT_DISPLACEMENT:
-    uint32_t displacement_val = mod==MOD_MEMORY_16BIT_DISPLACEMENT ? displacement.wide : displacement.lo;
-    sprintf(buf, "[%s + %u]", addr, displacement_val);
+    bool wide = mod==MOD_MEMORY_16BIT_DISPLACEMENT;
+    sprintf(buf, "%s", fmt_operand(op_addr_expr_with_displacement(R_M, wide, displacement)));
     return buf;
   case MOD_REGISTER:
     abort();
@@ -157,12 +155,11 @@ void instr_print(struct Instr instr)
     }
     case MOD_REGISTER:
     {
-      const char* REG = reg_to_str(reg_decode(mov.W, mov.REG));
-      const char* R_M = reg_to_str(reg_decode(mov.W, mov.R_M));
+      struct Operand dest = op_reg(mov.W, mov.R_M);
+      struct Operand src = op_reg(mov.W, mov.REG);
       if(mov.D)
-        printf("mov %s, %s\n", REG, R_M);
-      else
-        printf("mov %s, %s\n", R_M, REG);
+        op_swap(&dest, &src);
+      printf("mov %s, %s\n", fmt_operand(dest), fmt_operand(src));
       return;
     }
     }
