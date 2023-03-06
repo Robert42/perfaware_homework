@@ -75,6 +75,8 @@ static_assert(sizeof(struct Mov_Rm_R) == 4);
 static_assert(sizeof(struct Mov_Im_Rm) == 6);
 static_assert(sizeof(struct Mov_Im_R) == 3);
 
+#define MAX_INSTR_LEN sizeof(struct Instr)
+
 static int instr_size(struct Instr instr);
 
 struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
@@ -86,7 +88,7 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
 
   // ==== read instr ====
   struct Instr instr = {};
-  memcpy(&instr, instr_stream + *index, sizeof(struct Instr)); // I've made the buffer sizeof(struct Instr) bytes bigger tan necessary, so I can always copy sizeof(struct Instr) bytes without further checks
+  memcpy(&instr, instr_stream + *index, MAX_INSTR_LEN); // I've made the buffer is MAX_INSTR_LEN bytes bigger than necessary, so I can always copy MAX_INSTR_LEN bytes without further checks
 
   // ==== increment the index ====
   {

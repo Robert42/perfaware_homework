@@ -28,7 +28,7 @@ bool LOG = false;
 #include "decoder.c"
 
 #define BUF_SIZE 4096
-uint8_t bytes[BUF_SIZE + sizeof(struct Instr)] = {}; // allocating sizeof(Instr) more bytes so I can always copy the same number of bytes withou having to worry about buffer boundaries
+uint8_t bytes[BUF_SIZE + MAX_INSTR_LEN] = {}; // allocating MAX_INSTR_LEN more bytes so I can always copy bytes without having to worry about buffer boundaries
 int num_bytes = 0;
 
 int main(int argc, char** argv)
