@@ -12,3 +12,26 @@ enum Addr_Expr
   ADDREXPR_SI, ADDREXPR_DI, ADDREXPR_BP, ADDREXPR_BX,
 };
 static const char* addr_expr_to_str(enum Addr_Expr addr_expr);
+
+union Payload
+{
+  uint8_t u8;
+  uint16_t u16;
+};
+
+enum Operand_Variant
+{
+  OPERAND_REG,
+  OPERAND_ADDR_EXPR,
+};
+struct Operand
+{
+  enum Operand_Variant variant : 1;
+  union
+  {
+    enum Reg reg : 4;
+    enum Addr_Expr addr_expr : 3;
+  };
+  union Payload addr_displacement;
+  union Payload value;
+};

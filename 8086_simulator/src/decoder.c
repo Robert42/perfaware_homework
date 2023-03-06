@@ -20,12 +20,6 @@ enum Mod_Encoding
 };
 static_assert(sizeof(enum Mod_Encoding) == 1);
 
-union Payload
-{
-  uint8_t u8;
-  uint16_t u16;
-};
-
 struct Instr
 {
   union
