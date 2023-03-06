@@ -43,3 +43,15 @@ union Payload read_payload(bool wide, struct Byte_Stream* s)
     data.lo = read_u8(s);
   return data;
 }
+
+uint16_t read_s16_with_sign_extension(bool read_two_bytes, struct Byte_Stream* s)
+{
+  if(read_two_bytes)
+    return read_u16(s);
+  
+  uint16_t x = read_u8(s);
+  if(x & 0x80)
+    x |= 0xff00;
+
+  return x;
+}

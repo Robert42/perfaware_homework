@@ -33,7 +33,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     instr.op = MOV;
 
     const bool W = bytes[0] & 1;
-    ASSERT(W, "what does it write to when not wide? AL?");
+    ASSERT(W, "UNIMPLEMENTED! what does it write to when not wide? AL?");
     instr.dest = op_reg(W, AL);
     instr.src = op_addr_direct(read_u16(byte_stream));
 
@@ -96,8 +96,8 @@ struct Operand decode_addr_expr(bool W, uint8_t mod, uint8_t r_m, struct Byte_St
   case 1 ... 2:
   {
     const bool wide_displacement = mod == 2;
-    const union Payload displacement = read_payload(wide_displacement, byte_stream);
-    return op_addr_expr_with_displacement(r_m, wide_displacement, displacement);
+    const uint16_t displacement = read_s16_with_sign_extension(wide_displacement, byte_stream);
+    return op_addr_expr_with_displacement(r_m, displacement);
   }
   case 3:
     return op_reg(W, r_m);

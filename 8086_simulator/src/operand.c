@@ -62,8 +62,7 @@ const char* fmt_operand(struct Operand op)
     return reg_to_str(op.reg);
   case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
   case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); goto done;
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.lo); goto done;
-  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: sprintf(text, "[%s + %u]", addr_expr_to_str(op.addr_expr), (uint)op.payload.wide); goto done;
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
   case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
   case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
   case OPERAND_COUNT: abort();
@@ -116,11 +115,11 @@ struct Operand op_addr_expr(enum Addr_Expr addr_expr)
   };
 }
 
-struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, bool W, union Payload displacement)
+struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t displacement)
 {
   return (struct Operand){
-    .variant = W ? OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16 : OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8,
+    .variant = OPERAND_ADDR_EXPR_WITH_DISPLACEMENT,
     .addr_expr = addr_expr,
-    .payload = displacement,
+    .payload.wide = displacement,
   };
 }
