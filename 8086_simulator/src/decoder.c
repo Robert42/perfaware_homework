@@ -1,3 +1,4 @@
+#if 0
 struct Decoder;
 
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
@@ -75,17 +76,57 @@ static_assert(sizeof(struct Mov_Rm_R) == 4);
 static_assert(sizeof(struct Mov_Im_Rm) == 6);
 static_assert(sizeof(struct Mov_Im_R) == 3);
 
-#define MAX_INSTR_LEN sizeof(struct Decoder)
-
-static int instr_size(struct Decoder instr);
 static struct Instr to_instr(struct Decoder instr);
+#endif
 
-struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
+struct Byte_Stream
 {
-  ASSERT(*index + 1 <= num_bytes, "no more instructions to decode!");
+  const uint8_t* begin;
+  const uint8_t* end;
+};
+
+void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
+{
+  ASSERT(s->begin+n_bytes <= s->end, "unexpected end!");
+
+  memcpy(dest, s->begin, n_bytes);
 
   if(LOG)
-    fprintf(stderr, "%4i | %02X ", *index, instr_stream[0]);
+  {
+    for(int i=0; i<n_bytes; ++i)
+      fprintf(stderr, " %02X", s->begin[i]);
+  }
+  
+  s->begin += n_bytes;
+}
+
+uint8_t read_u8(struct Byte_Stream* s)
+{
+  uint8_t x;
+  read_bytes(&x, sizeof(x), s);
+  return x;
+}
+
+uint8_t read_u16(struct Byte_Stream* s)
+{
+  uint16_t x;
+  read_bytes(&x, sizeof(x), s);
+  return x;
+}
+
+struct Instr instr_decode(struct Byte_Stream* byte_stream)
+{
+  const uint8_t first = read_u8(byte_stream);
+
+  struct Instr instr = {};
+  
+  return instr;
+}
+
+#if 0
+#define CASE_OPCODE(OPCODE) case
+
+#undef
 
   // ==== read instr ====
   struct Decoder instr = {};
@@ -228,3 +269,4 @@ enum Op_Code op(struct Decoder instr)
   ASSERT(false, "Could not decode opcode from byte: 0o%03o  0x%02X", (uint32_t)instr.bytes[0], (uint32_t)instr.bytes[0]);
 #undef CASE
 }
+#endif
