@@ -27,7 +27,7 @@ uint8_t read_u8(struct Byte_Stream* s)
   return x;
 }
 
-uint8_t read_u16(struct Byte_Stream* s)
+uint16_t read_u16(struct Byte_Stream* s)
 {
   uint16_t x;
   read_bytes(&x, sizeof(x), s);

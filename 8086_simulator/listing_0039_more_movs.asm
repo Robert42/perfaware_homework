@@ -22,8 +22,8 @@ mov dh, al
 
 ; 8-bit immediate-to-register
 mov cx, 12
-;mov cx, -12
-; 
+mov cx, -12
+ 
 ; ; (robert) added test for storing in 16 bit registers
 ; mov cl, 42
 ; mov ch, 42

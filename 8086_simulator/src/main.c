@@ -40,9 +40,9 @@ int main(int argc, char** argv)
   ASSERT(argc == 2, "usage: %s [FILE]\n", program);
   const char* const filepath = argv[1];
 
-  LOG = strstr(filepath, "0040");
+  LOG = strstr(filepath, "0039");
   if(LOG)
-    fprintf(stderr, "==== %s ====\n", filepath);
+    fprintf(stderr, "==== %s ====", filepath);
 
   // read file
   struct Byte_Stream byte_stream = {
@@ -63,7 +63,9 @@ int main(int argc, char** argv)
   while(byte_stream.begin < byte_stream.end)
   {
     if(LOG)
-      fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
+      fprintf(stderr, "\n%4lu |", byte_stream.begin - bytes);
     instr_print(instr_decode(&byte_stream), stdout);
   }
+  if(LOG)
+    fprintf(stderr, "\n");
 }
