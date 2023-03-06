@@ -78,8 +78,9 @@ static_assert(sizeof(struct Mov_Im_R) == 3);
 #define MAX_INSTR_LEN sizeof(struct Decoder)
 
 static int instr_size(struct Decoder instr);
+static struct Instr to_instr(struct Decoder instr);
 
-struct Decoder instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
+struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes)
 {
   ASSERT(*index + 1 <= num_bytes, "no more instructions to decode!");
 
@@ -105,7 +106,7 @@ struct Decoder instr_decode(const uint8_t* instr_stream, int* index, int num_byt
     *index += size;
   }
 
-  return instr;
+  return to_instr(instr);
 }
 
 struct Operand op_addr(enum Mod_Encoding mod, uint8_t R_M, union Payload displacement)
@@ -130,9 +131,8 @@ struct Operand op_addr(enum Mod_Encoding mod, uint8_t R_M, union Payload displac
   abort();
 }
 
-void instr_print(struct Decoder instr)
+static struct Instr to_instr(struct Decoder instr)
 {
-
   switch(op(instr))
   {
   case OP_MOV_RM_R:
@@ -148,8 +148,7 @@ void instr_print(struct Decoder instr)
       struct Operand src = op_reg(mov.W, mov.REG);
       if(mov.D)
         op_swap(&dest, &src);
-      printf("mov %s, %s\n", fmt_operand(dest), fmt_operand(src));
-      return;
+      return (struct Instr){.op=MOV, .dest=dest, .src=src};
     }
     case MOD_REGISTER:
     {
@@ -157,8 +156,7 @@ void instr_print(struct Decoder instr)
       struct Operand src = op_reg(mov.W, mov.REG);
       if(mov.D)
         op_swap(&dest, &src);
-      printf("mov %s, %s\n", fmt_operand(dest), fmt_operand(src));
-      return;
+      return (struct Instr){.op=MOV, .dest=dest, .src=src};
     }
     }
     abort();
@@ -184,8 +182,7 @@ void instr_print(struct Decoder instr)
     const struct Mov_Im_R mov = instr.mov_im_r;
     const struct Operand dest = op_reg(mov.W, mov.REG);
     const struct Operand src = op_im(mov.W, mov.data);
-    printf("mov %s, %s\n", fmt_operand(dest), fmt_operand(src));
-    return;
+    return (struct Instr){.op=MOV, .dest=dest, .src=src};
   }
   }
   abort();

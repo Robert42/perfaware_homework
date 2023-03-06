@@ -23,7 +23,9 @@ bool LOG = false;
 #define ARRAY_LEN(X) (sizeof(X) / sizeof(X[0]))
 
 #include "operand.h"
+#include "instr.h"
 
+#include "instr.c"
 #include "operand.c"
 #include "decoder.c"
 
@@ -56,5 +58,5 @@ int main(int argc, char** argv)
   printf("bits 16\n\n");
 
   for(int i=0; i < num_bytes;)
-    instr_print(instr_decode(bytes, &i, num_bytes));
+    instr_print(instr_decode(bytes, &i, num_bytes), stdout);
 }
