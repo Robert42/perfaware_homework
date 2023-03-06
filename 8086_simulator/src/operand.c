@@ -54,7 +54,7 @@ const char* fmt_operand(struct Operand op)
   if(START > ARRAY_LEN(RING_BUFFER) - MAX_LINE_LEN)
     START = 0;
 
-  // const char* text = RING_BUFFER + START;
+  char* text = RING_BUFFER + START;
   
   switch(op.variant)
   {
@@ -64,8 +64,8 @@ const char* fmt_operand(struct Operand op)
   case OPERAND_ADDR_EXPR: UNIMPLEMENTED();
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_8: UNIMPLEMENTED();
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT_16: UNIMPLEMENTED();
-  case OPERAND_IMMEDIATE_8: UNIMPLEMENTED();
-  case OPERAND_IMMEDIATE_16: UNIMPLEMENTED();
+  case OPERAND_IMMEDIATE_8: sprintf(text, "%" PRIu8, op.value.lo); return text;
+  case OPERAND_IMMEDIATE_16: sprintf(text, "%" PRIu16, op.value.wide); return text;
   case OPERAND_COUNT: abort();
   }
 
@@ -84,5 +84,13 @@ struct Operand op_reg(bool W, uint8_t REG)
   return (struct Operand){
     .variant = OPERAND_REG,
     .reg = reg_decode(W, REG),
+  };
+}
+
+struct Operand op_im(bool W, union Payload payload)
+{
+  return (struct Operand){
+    .variant = W ? OPERAND_IMMEDIATE_16 : OPERAND_IMMEDIATE_8,
+    .value = payload,
   };
 }

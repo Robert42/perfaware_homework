@@ -67,15 +67,7 @@ struct Instr
       uint8_t _opcode : 4; // OP_MOV_IM_R
 
       // == byte 1 ==
-      union
-      {
-        struct
-        {
-          uint8_t data_lo;
-          uint8_t data_hi;
-        };
-        uint16_t data;
-      };
+      union Payload data;
     } mov_im_r;
   };
 };
@@ -124,13 +116,13 @@ const char* fmt_addr(char* buf, enum Mod_Encoding mod, uint8_t R_M, union Payloa
   {
   case MOD_MEMORY_NO_DISPLACEMENT:
     if(R_M==6)
-      sprintf(buf, "[%" PRIu16 "]", displacement.u16);
+      sprintf(buf, "[%" PRIu16 "]", displacement.wide);
     else
       sprintf(buf, "[%s]", addr);
     return buf;
   case MOD_MEMORY_8BIT_DISPLACEMENT:
   case MOD_MEMORY_16BIT_DISPLACEMENT:
-    uint32_t displacement_val = mod==MOD_MEMORY_16BIT_DISPLACEMENT ? displacement.u16 : displacement.u8;
+    uint32_t displacement_val = mod==MOD_MEMORY_16BIT_DISPLACEMENT ? displacement.wide : displacement.lo;
     sprintf(buf, "[%s + %u]", addr, displacement_val);
     return buf;
   case MOD_REGISTER:
@@ -196,8 +188,8 @@ void instr_print(struct Instr instr)
   {
     const struct Mov_Im_R mov = instr.mov_im_r;
     const struct Operand dest = op_reg(mov.W, mov.REG);
-    const uint32_t data = mov.W ? mov.data : mov.data_lo;
-    printf("mov %s, %u\n", fmt_operand(dest), (uint32_t)data);
+    const struct Operand src = op_im(mov.W, mov.data);
+    printf("mov %s, %s\n", fmt_operand(dest), fmt_operand(src));
     return;
   }
   }

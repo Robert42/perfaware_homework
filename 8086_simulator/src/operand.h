@@ -15,8 +15,12 @@ static const char* addr_expr_to_str(enum Addr_Expr addr_expr);
 
 union Payload
 {
-  uint8_t u8;
-  uint16_t u16;
+  struct
+  {
+    uint8_t lo;
+    uint8_t hi;
+  };
+  uint16_t wide;
 };
 
 enum Operand_Variant
@@ -39,10 +43,11 @@ struct Operand
     enum Reg reg;
     enum Addr_Expr addr_expr;
   };
-  union Payload value;
   union Payload addr_displacement;
+  union Payload value;
 };
 const char* fmt_operand(struct Operand op);
 
 void op_swap(struct Operand* x, struct Operand* y);
 struct Operand op_reg(bool W, uint8_t REG);
+struct Operand op_im(bool W, union Payload payload);
