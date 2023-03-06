@@ -122,12 +122,7 @@ struct Instr instr_decode(const uint8_t* instr_stream, int* index, int num_bytes
 
 const char* fmt_addr(char* buf, enum Mod_Encoding mod, uint8_t R_M, union Payload displacement)
 {
-  static const char* const addr_TABLE[] = {
-    "BX + SI", "BX + DI", "BP + SI", "BP + DI",
-    "SI", "DI", "BP", "BX",
-  };
-
-  const char* addr = addr_TABLE[R_M];
+  const char* addr = addr_expr_to_str(R_M);
 
   ASSERT(mod != MOD_REGISTER);
 

@@ -30,3 +30,15 @@ static const char* reg_to_str(enum Reg reg)
 #undef CASE
   abort();
 }
+
+static const char* addr_expr_to_str(enum Addr_Expr addr_expr)
+{
+  static const char* const addr_TABLE[] = {
+    "BX + SI", "BX + DI", "BP + SI", "BP + DI",
+    "SI", "DI", "BP", "BX",
+  };
+
+  ASSERT(0 <= addr_expr && addr_expr < 8);
+
+  return addr_TABLE[addr_expr];
+}
