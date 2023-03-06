@@ -1,5 +1,7 @@
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
 
+struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
+
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
   uint8_t bytes[6] = {};
@@ -37,9 +39,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const uint8_t reg = (bytes[1] & 0070) >> 3;
     const uint8_t r_m = bytes[1] & 0007;
 
-    ASSERT(mod == 3, "%i", mod);
-    instr.dest = op_reg(W, r_m);
+    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
     instr.src = op_reg(W, reg);
+
     if(D)
       op_swap(&instr.dest, &instr.src);
     return instr;
@@ -47,4 +49,26 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
 
   UNIMPLEMENTED("%03o", bytes[0]);
+}
+
+struct Operand decode_addr_expr(bool W, uint8_t mod, uint8_t r_m, struct Byte_Stream* byte_stream)
+{
+  switch(mod)
+  {
+  case 0:
+    if(r_m == 6)
+      return op_addr_direct(read_u16(byte_stream));
+    else
+      return op_addr_expr(r_m);
+  case 1 ... 2:
+  {
+    const bool wide_displacement = mod == 2;
+    const union Payload displacement = read_payload(wide_displacement, byte_stream);
+    return op_addr_expr_with_displacement(r_m, wide_displacement, displacement);
+  }
+  case 3:
+    return op_reg(W, r_m);
+  }
+
+  abort();
 }

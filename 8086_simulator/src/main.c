@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     ASSERT(f != NULL, "Could not open: <%s> for reading\n", filepath);
     byte_stream.end = byte_stream.begin + fread(bytes, 1, BUF_SIZE, f);
     fclose(f);
-    ASSERT(byte_stream.begin < byte_stream.end, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
+    ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
   }
 
   // output
