@@ -35,11 +35,10 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     ASSERT(W, "what does it write to when not wide? AL?");
     instr.dest = op_reg(W, AL);
-    instr.src = op_im(W, read_payload(W, byte_stream));
+    instr.src = op_addr_direct(read_u16(byte_stream));
 
     if(acc_to_mem)
       op_swap(&instr.dest, &instr.src);
-
     return instr;
   }
   }
