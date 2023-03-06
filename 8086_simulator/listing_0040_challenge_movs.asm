@@ -33,6 +33,10 @@ mov bx, [3458]
 mov ax, [2555]
 mov ax, [16]
 
+; (robert) added test
+mov al, [16]
+mov ah, [16]
+
 ; Accumulator-to-memory test
 mov [2554], ax
 mov [15], ax

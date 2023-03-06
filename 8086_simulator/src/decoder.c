@@ -33,7 +33,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     instr.op = MOV;
 
     const bool W = bytes[0] & 1;
-    ASSERT(W, "UNIMPLEMENTED! what does it write to when not wide? AL?");
     instr.dest = op_reg(W, AL);
     instr.src = op_addr_direct(read_u16(byte_stream));
 
