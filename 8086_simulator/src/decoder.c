@@ -37,9 +37,34 @@ uint8_t read_u16(struct Byte_Stream* s)
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
-  const uint8_t first = read_u8(byte_stream);
-
-  struct Instr instr = {};
+  uint8_t bytes[6] = {};
   
-  return instr;
+  bytes[0] = read_u8(byte_stream);
+  
+  struct Instr instr = {};
+
+  switch(bytes[0] & 0xfc)
+  {
+  case 0210:
+  {
+    instr.op = MOV;
+
+    const bool D = bytes[0] & 2;
+    const bool W = bytes[0] & 1;
+
+    bytes[1] = read_u8(byte_stream);
+    const uint8_t mod = (bytes[1] & 0300) >> 6;
+    const uint8_t reg = (bytes[1] & 0070) >> 3;
+    const uint8_t r_m = bytes[1] & 0007;
+
+    ASSERT(mod == 3, "%i", mod);
+    instr.dest = op_reg(W, r_m);
+    instr.src = op_reg(W, reg);
+    if(D)
+      op_swap(&instr.dest, &instr.src);
+    return instr;
+  }
+  }
+
+  UNIMPLEMENTED();
 }
