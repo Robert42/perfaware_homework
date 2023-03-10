@@ -1,6 +1,7 @@
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
 
 struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_rm_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -45,24 +46,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   switch(bytes[0] & 0xfc)
   {
   case 0210: // Register/memory to/from register
-  {
-    instr.op = MOV;
-
-    const bool D = bytes[0] & 2;
-    const bool W = bytes[0] & 1;
-
-    bytes[1] = read_u8(byte_stream);
-    const uint8_t mod = (bytes[1] & 0300) >> 6;
-    const uint8_t reg = (bytes[1] & 0070) >> 3;
-    const uint8_t r_m = bytes[1] & 0007;
-
-    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
-    instr.src = op_reg(W, reg);
-
-    if(D)
-      op_swap(&instr.dest, &instr.src);
-    return instr;
-  }
+    return decode_instr_rm_rm(MOV, bytes, byte_stream);
   }
   
   switch(bytes[0] & 0xf0)
@@ -83,23 +67,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
-  {
-    const bool D = bytes[0] & 2;
-    const bool W = bytes[0] & 1;
-
-    bytes[1] = read_u8(byte_stream);
-    const uint8_t mod = (bytes[1] & 0300) >> 6;
-    const uint8_t reg = (bytes[1] & 0070) >> 3;
-    const uint8_t r_m = bytes[1] & 0007;
-
-    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
-    instr.src = op_reg(W, reg);
-
-    if(D)
-      op_swap(&instr.dest, &instr.src);
-    instr.op = ADD;
-    return instr;
-  }
+    return decode_instr_rm_rm(ADD, bytes, byte_stream);
 
   UNIMPLEMENTED("%03o", bytes[0]);
 }
@@ -124,4 +92,24 @@ struct Operand decode_addr_expr(bool W, uint8_t mod, uint8_t r_m, struct Byte_St
   }
 
   abort();
+}
+
+struct Instr decode_instr_rm_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+{
+    struct Instr instr = {.op=op};
+
+    const bool D = bytes[0] & 2;
+    const bool W = bytes[0] & 1;
+
+    bytes[1] = read_u8(byte_stream);
+    const uint8_t mod = (bytes[1] & 0300) >> 6;
+    const uint8_t reg = (bytes[1] & 0070) >> 3;
+    const uint8_t r_m = bytes[1] & 0007;
+
+    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
+    instr.src = op_reg(W, reg);
+
+    if(D)
+      op_swap(&instr.dest, &instr.src);
+    return instr;
 }
