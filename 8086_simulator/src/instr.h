@@ -1,4 +1,5 @@
-#define ARITH_OP 0x80
+#define ARITH_OP 0x10
+#define JMP_OP 0x20
 
 enum Instr_Op
 {
@@ -10,7 +11,7 @@ enum Instr_Op
   CMP = ARITH_OP | 0b111,
 
   // jump
-  JNZ,
+  JNZ = JMP_OP | 0b0101,
 };
 
 struct Instr
@@ -27,3 +28,4 @@ struct Instr
 };
 void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos);
 const char* instr_op_str(enum Instr_Op op);
+bool is_jmp(enum Instr_Op op);

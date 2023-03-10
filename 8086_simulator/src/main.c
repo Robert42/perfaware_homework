@@ -67,17 +67,13 @@ int main(int argc, char** argv)
 
     const size_t curr_pos = byte_stream.begin-bytes;
     ASSERT(curr_pos < UINT16_MAX);
-    switch(instr.op)
+    if(is_jmp(instr.op))
     {
-    case JNZ:
       if(LABELS[curr_pos+instr.ip_incr] == 0)
       {
         ASSERT(num_labels < UINT16_MAX);
         LABELS[curr_pos+instr.ip_incr] = ++num_labels;
       }
-      break;
-    default:
-      break;
     }
 
     if(LOG)

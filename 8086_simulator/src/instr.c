@@ -38,3 +38,8 @@ const char* instr_op_str(enum Instr_Op op)
 
   abort();
 }
+
+bool is_jmp(enum Instr_Op op)
+{
+  return (0xf0 & op) == JMP_OP;
+}
