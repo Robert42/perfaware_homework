@@ -69,6 +69,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0260: // Immediate to register
   {
+    instr.op = MOV;
+
     const bool W = bytes[0] & 0010;
     const uint8_t reg = bytes[0] & 0007;
 
@@ -95,7 +97,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
 
     if(D)
       op_swap(&instr.dest, &instr.src);
-    instr.op = 0;
+    instr.op = ADD;
     return instr;
   }
 
