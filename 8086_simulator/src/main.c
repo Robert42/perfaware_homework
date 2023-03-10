@@ -69,9 +69,9 @@ int main(int argc, char** argv)
     if(LOG)
     {
       for(; BYTES_READ < 6; ++BYTES_READ)
-        fprintf(stderr, " ..");
+        fprintf(stderr, "    " + (LOG_BYTES==LB_HEX));
       BYTES_READ = 0;
-      fprintf(stderr, " \t");
+      fprintf(stderr, "\t\t");
       instr_print(instr, stderr);
     }
   }

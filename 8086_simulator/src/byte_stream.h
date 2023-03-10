@@ -5,6 +5,11 @@ struct Byte_Stream
   const uint8_t* end;
 };
 
+enum Log_Bytes
+{
+  LB_OCT,
+  LB_HEX,
+}LOG_BYTES = LB_OCT;
 size_t BYTES_READ = 0;
 
 void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
@@ -17,7 +22,7 @@ void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
   {
     for(int i=0; i<n_bytes; ++i)
     {
-      fprintf(stderr, " %02X", s->begin[i]);
+      fprintf(stderr, (LOG_BYTES==LB_HEX) ? " %02X" : " %03o", s->begin[i]);
       BYTES_READ++;
     }
   }
