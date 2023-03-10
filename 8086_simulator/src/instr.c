@@ -3,11 +3,20 @@ void instr_print(struct Instr instr, FILE* file)
   switch(instr.op)
   {
   case MOV:
-    fprintf(file, "mov %s, %s\n", fmt_operand(instr.dest), fmt_operand(instr.src));
-    return;
   case ADD:
-    fprintf(file, "add %s, %s\n", fmt_operand(instr.dest), fmt_operand(instr.src));
+    fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
+  }
+
+  abort();
+}
+
+const char* instr_op_str(enum Instr_Op op)
+{
+  switch(op)
+  {
+  case MOV: return "mov";
+  case ADD: return "add";
   }
 
   abort();
