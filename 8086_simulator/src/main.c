@@ -56,6 +56,9 @@ int main(int argc, char** argv)
   }
 
   // == first pass finding the labels (and debug printing) ==
+  uint16_t num_labels = 0;
+  uint16_t LABELS[ARRAY_LEN(bytes)] = {};
+
   while(byte_stream.begin < byte_stream.end)
   {
     if(LOG)
@@ -67,7 +70,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "    " + (LOG_BYTES==LB_HEX));
       BYTES_READ = 0;
       fprintf(stderr, "\t\t");
-      instr_print(instr, stderr);
+      instr_print(instr, stderr, NULL, -1);
     }
   }
   if(LOG)
@@ -83,6 +86,6 @@ int main(int argc, char** argv)
   while(byte_stream.begin < byte_stream.end)
   {
     const struct Instr instr = instr_decode(&byte_stream);
-    instr_print(instr, stdout);
+    instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
   }
 }

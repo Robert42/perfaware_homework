@@ -25,5 +25,5 @@ struct Instr
     int8_t ip_incr;
   };
 };
-void instr_print(struct Instr instr, FILE* file);
+void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, uint16_t curr_pos);
 const char* instr_op_str(enum Instr_Op op);
