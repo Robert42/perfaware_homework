@@ -6,6 +6,8 @@ struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, 
 struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
+enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> rshift)) | ARITH_OP;}
+
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
   uint8_t bytes[6] = {};
@@ -16,6 +18,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0306: // Immediate to register/memory
     const bool W = bytes[0] & 1;
+    bytes[1] = read_u8(byte_stream);
     return decode_instr_im2rm(MOV, W, bytes, byte_stream);
   }
 
@@ -24,7 +27,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   // Immediate to register/memory
   case 0200:
     const bool wide_im = (bytes[0] & 3) == 1;
-    return decode_instr_im2rm(ADD, wide_im, bytes, byte_stream);
+    bytes[1] = read_u8(byte_stream);
+    return decode_instr_im2rm(arith_op(bytes[1], 3), wide_im, bytes, byte_stream);
 
   case 0210: // Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
@@ -41,7 +45,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   // Immediate to accumulator
   if((bytes[0] & 0b11000100) == 0b100)
   {
-    struct Instr instr = {.op=ADD};
+    struct Instr instr = {.op=arith_op(bytes[0], 3)};
     const bool W = bytes[0] & 1;
     const union Payload data = read_payload(W, byte_stream);
     instr.dest = op_reg(W, AL);
@@ -50,7 +54,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
-    return decode_instr_rm2rm(ADD, bytes, byte_stream);
+    return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
 
   UNIMPLEMENTED("%03o", bytes[0]);
 }
@@ -103,7 +107,6 @@ struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, 
 
   const bool W = bytes[0] & 1;
 
-  bytes[1] = read_u8(byte_stream);
   const uint8_t mod = (bytes[1] & 0300) >> 6;
   const uint8_t r_m = bytes[1] & 0007;
 

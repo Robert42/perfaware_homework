@@ -1,15 +1,14 @@
-#define ARITH 0x80
+#define ARITH_OP 0x80
 
 enum Instr_Op
 {
   MOV,
 
   // arith
-  ADD = ARITH | 0b000,
+  ADD = ARITH_OP | 0b000,
+  SUB = ARITH_OP | 0b101,
 
 };
-
-#undef ARITH
 
 struct Instr
 {
