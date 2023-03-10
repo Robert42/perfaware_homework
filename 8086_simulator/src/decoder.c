@@ -80,6 +80,25 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
   }
 
+  if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
+  {
+    const bool D = bytes[0] & 2;
+    const bool W = bytes[0] & 1;
+
+    bytes[1] = read_u8(byte_stream);
+    const uint8_t mod = (bytes[1] & 0300) >> 6;
+    const uint8_t reg = (bytes[1] & 0070) >> 3;
+    const uint8_t r_m = bytes[1] & 0007;
+
+    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
+    instr.src = op_reg(W, reg);
+
+    if(D)
+      op_swap(&instr.dest, &instr.src);
+    instr.op = 0;
+    return instr;
+  }
+
   UNIMPLEMENTED("%03o", bytes[0]);
 }
 
