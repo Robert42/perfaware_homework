@@ -4,6 +4,7 @@ struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_S
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -11,8 +12,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   
   bytes[0] = read_u8(byte_stream);
   
-  struct Instr instr = {};
-
   switch(bytes[0] & 0xfe)
   {
   case 0306: // Immediate to register/memory
@@ -24,18 +23,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0210: // Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
   case 0240: // Memory to/from accumulator
-  {
-    const bool D = (bytes[0] & 2);
-    instr.op = MOV;
-
-    const bool W = bytes[0] & 1;
-    instr.dest = op_reg(W, AL);
-    instr.src = op_addr_direct(read_u16(byte_stream));
-
-    if(D)
-      op_swap(&instr.dest, &instr.src);
-    return instr;
-  }
+    return decode_instr_mem_acc(MOV, bytes, byte_stream);
   }
   
   switch(bytes[0] & 0xf0)
@@ -118,5 +106,21 @@ struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Str
 
   instr.dest = op_reg(W, reg);
   instr.src = op_im(W, data);
+  return instr;
+}
+
+struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+{
+  struct Instr instr = {.op=op};
+
+  const bool D = (bytes[0] & 2);
+  instr.op = MOV;
+
+  const bool W = bytes[0] & 1;
+  instr.dest = op_reg(W, AL);
+  instr.src = op_addr_direct(read_u16(byte_stream));
+
+  if(D)
+    op_swap(&instr.dest, &instr.src);
   return instr;
 }
