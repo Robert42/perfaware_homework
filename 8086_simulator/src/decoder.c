@@ -7,6 +7,7 @@ struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Str
 struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> rshift)) | ARITH_OP;}
+enum Instr_Op jmp_op(uint8_t encoded){return (encoded & 0x0f) | JMP_OP;}
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -42,7 +43,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_im2r(MOV, bytes, byte_stream);
   case 0x70:
     bytes[1] = read_u8(byte_stream);
-    return (struct Instr){.op=JNZ, .ip_incr=bytes[1]};
+    return (struct Instr){.op=jmp_op(bytes[0]), .ip_incr=bytes[1]};
   }
 
   // Immediate to accumulator

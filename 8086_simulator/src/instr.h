@@ -11,6 +11,8 @@ enum Instr_Op
   CMP = ARITH_OP | 0b111,
 
   // jump
+  JZ  = JMP_OP | 0b0100,
+  JL  = JMP_OP | 0b1100,
   JNZ = JMP_OP | 0b0101,
 };
 

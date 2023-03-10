@@ -9,6 +9,8 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
   case JNZ:
+  case JZ:
+  case JL:
     if(labels)
     {
       ASSERT(labels[curr_pos+instr.ip_incr] > 0);
@@ -34,6 +36,8 @@ const char* instr_op_str(enum Instr_Op op)
   case CMP: return "cmp";
 
   case JNZ: return "jnz";
+  case JZ: return "jz";
+  case JL: return "jl";
   }
 
   abort();
