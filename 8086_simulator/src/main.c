@@ -55,10 +55,6 @@ int main(int argc, char** argv)
     ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%lu)\n", filepath, ARRAY_LEN(bytes));
   }
 
-  // output
-  printf("; %s\n", filepath);
-  printf("bits 16\n\n");
-
   // == first pass finding the labels (and debug printing) ==
   while(byte_stream.begin < byte_stream.end)
   {
@@ -79,6 +75,10 @@ int main(int argc, char** argv)
   LOG = false;
   
   // == second pass with the actual output ==
+
+  printf("; %s\n", filepath);
+  printf("bits 16\n\n");
+
   byte_stream.begin = bytes;
   while(byte_stream.begin < byte_stream.end)
   {
