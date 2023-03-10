@@ -59,12 +59,12 @@ int main(int argc, char** argv)
   printf("; %s\n", filepath);
   printf("bits 16\n\n");
 
+  // == first pass finding the labels (and debug printing) ==
   while(byte_stream.begin < byte_stream.end)
   {
     if(LOG)
       fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
     const struct Instr instr = instr_decode(&byte_stream);
-    instr_print(instr, stdout);
     if(LOG)
     {
       for(; BYTES_READ < 6; ++BYTES_READ)
@@ -76,4 +76,13 @@ int main(int argc, char** argv)
   }
   if(LOG)
     fprintf(stderr, "\n");
+  LOG = false;
+  
+  // == second pass with the actual output ==
+  byte_stream.begin = bytes;
+  while(byte_stream.begin < byte_stream.end)
+  {
+    const struct Instr instr = instr_decode(&byte_stream);
+    instr_print(instr, stdout);
+  }
 }
