@@ -23,7 +23,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0210: // Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
-  case 0240: // Memory to accumulator
+  case 0240: // Memory to/from accumulator
   {
     const bool D = (bytes[0] & 2);
     instr.op = MOV;
