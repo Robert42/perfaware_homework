@@ -1,7 +1,7 @@
 enum Instr_Op
 {
-  ADD = 0,
-  MOV = 1,
+  MOV = 0,
+  ADD = 1,
 };
 
 struct Instr
