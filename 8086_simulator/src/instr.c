@@ -1,4 +1,4 @@
-void instr_print(struct Instr instr, FILE* file)
+void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos)
 {
   switch(instr.op)
   {
@@ -9,7 +9,14 @@ void instr_print(struct Instr instr, FILE* file)
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
   case JNZ:
-    fprintf(file, "%s %" PRIi8 "\n", instr_op_str(instr.op), instr.ip_incr);
+    if(labels)
+    {
+      ASSERT(labels[curr_pos+instr.ip_incr] > 0);
+      fprintf(file, "%s label%" PRIu16 "\n", instr_op_str(instr.op), labels[curr_pos+instr.ip_incr]-1);
+    }else
+    {
+      fprintf(file, "%s %" PRIi8 "\n", instr_op_str(instr.op), instr.ip_incr);
+    }
     return;
   }
 

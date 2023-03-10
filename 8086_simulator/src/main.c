@@ -64,13 +64,29 @@ int main(int argc, char** argv)
     if(LOG)
       fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
     const struct Instr instr = instr_decode(&byte_stream);
+
+    const size_t curr_pos = byte_stream.begin-bytes;
+    ASSERT(curr_pos < UINT16_MAX);
+    switch(instr.op)
+    {
+    case JNZ:
+      if(LABELS[curr_pos+instr.ip_incr] == 0)
+      {
+        ASSERT(num_labels < UINT16_MAX);
+        LABELS[curr_pos+instr.ip_incr] = ++num_labels;
+      }
+      break;
+    default:
+      break;
+    }
+
     if(LOG)
     {
       for(; BYTES_READ < 6; ++BYTES_READ)
         fprintf(stderr, "    " + (LOG_BYTES==LB_HEX));
       BYTES_READ = 0;
       fprintf(stderr, "\t\t");
-      instr_print(instr, stderr, NULL, -1);
+      instr_print(instr, stderr, NULL, SIZE_MAX);
     }
   }
   if(LOG)
@@ -85,6 +101,12 @@ int main(int argc, char** argv)
   byte_stream.begin = bytes;
   while(byte_stream.begin < byte_stream.end)
   {
+    {
+      const size_t label_pos = byte_stream.begin-bytes;
+      if(LABELS[label_pos] != 0)
+        printf("label%" PRIu16 ":\n", LABELS[label_pos]-1);
+    }
+
     const struct Instr instr = instr_decode(&byte_stream);
     instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
   }
