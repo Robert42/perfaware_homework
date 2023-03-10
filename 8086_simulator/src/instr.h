@@ -9,13 +9,21 @@ enum Instr_Op
   SUB = ARITH_OP | 0b101,
   CMP = ARITH_OP | 0b111,
 
+  // jump
+  JNZ,
 };
 
 struct Instr
 {
   enum Instr_Op op;
-  struct Operand dest;
-  struct Operand src;
+  union
+  {
+    struct{
+      struct Operand dest;
+      struct Operand src;
+    };
+    int8_t ip_incr;
+  };
 };
 void instr_print(struct Instr instr, FILE* file);
 const char* instr_op_str(enum Instr_Op op);

@@ -42,6 +42,13 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_im2r(MOV, bytes, byte_stream);
   }
 
+  switch(bytes[0] & 0300)
+  {
+  case 0100:
+    bytes[1] = read_u8(byte_stream);
+    return (struct Instr){.op=JNZ, .ip_incr=bytes[1]};
+  }
+
   // Immediate to accumulator
   if((bytes[0] & 0b11000100) == 0b100)
   {
