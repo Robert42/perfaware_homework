@@ -17,17 +17,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0306: // Immediate to register/memory
     const bool W = bytes[0] & 1;
     return decode_instr_im2rm(MOV, W, bytes, byte_stream);
-
-  // Memory to/from accumulator
-  case 0004:
-  {
-    struct Instr instr = {.op=ADD};
-    const bool W = bytes[0] & 1;
-    const union Payload data = read_payload(W, byte_stream);
-    instr.dest = op_reg(W, AL);
-    instr.src = op_im(W, data);
-    return instr;
-  }
   }
 
   switch(bytes[0] & 0xfc)
@@ -47,6 +36,17 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0260: // Immediate to register
     return decode_instr_im2r(MOV, bytes, byte_stream);
+  }
+
+  // Immediate to accumulator
+  if((bytes[0] & 0b11000100) == 0b100)
+  {
+    struct Instr instr = {.op=ADD};
+    const bool W = bytes[0] & 1;
+    const union Payload data = read_payload(W, byte_stream);
+    instr.dest = op_reg(W, AL);
+    instr.src = op_im(W, data);
+    return instr;
   }
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
