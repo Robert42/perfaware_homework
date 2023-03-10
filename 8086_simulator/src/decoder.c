@@ -1,7 +1,7 @@
 // Using octals because of this article https://gist.github.com/seanjensengrey/f971c20d05d4d0efc0781f2f3c0353da suggested by x13pixels [in the comments of the course](https://www.computerenhance.com/p/instruction-decoding-on-the-8086/comment/13235714)
 
 struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
-struct Instr decode_instr_rm_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -46,7 +46,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   switch(bytes[0] & 0xfc)
   {
   case 0210: // Register/memory to/from register
-    return decode_instr_rm_rm(MOV, bytes, byte_stream);
+    return decode_instr_rm2rm(MOV, bytes, byte_stream);
   }
   
   switch(bytes[0] & 0xf0)
@@ -67,7 +67,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
-    return decode_instr_rm_rm(ADD, bytes, byte_stream);
+    return decode_instr_rm2rm(ADD, bytes, byte_stream);
 
   UNIMPLEMENTED("%03o", bytes[0]);
 }
@@ -94,7 +94,7 @@ struct Operand decode_addr_expr(bool W, uint8_t mod, uint8_t r_m, struct Byte_St
   abort();
 }
 
-struct Instr decode_instr_rm_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
 {
     struct Instr instr = {.op=op};
 
