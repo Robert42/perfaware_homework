@@ -2,7 +2,7 @@
 
 struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
-struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
@@ -15,11 +15,28 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   switch(bytes[0] & 0xfe)
   {
   case 0306: // Immediate to register/memory
-    return decode_instr_im2rm(MOV, bytes, byte_stream);
+    const bool W = bytes[0] & 1;
+    return decode_instr_im2rm(MOV, W, bytes, byte_stream);
+
+  // Memory to/from accumulator
+  case 0004:
+  {
+    struct Instr instr = {.op=ADD};
+    const bool W = bytes[0] & 1;
+    const union Payload data = read_payload(W, byte_stream);
+    instr.dest = op_reg(W, AL);
+    instr.src = op_im(W, data);
+    return instr;
+  }
   }
 
   switch(bytes[0] & 0xfc)
   {
+  // Immediate to register/memory
+  case 0200:
+    const bool wide_im = (bytes[0] & 3) == 1;
+    return decode_instr_im2rm(ADD, wide_im, bytes, byte_stream);
+
   case 0210: // Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
   case 0240: // Memory to/from accumulator
@@ -80,7 +97,7 @@ struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_St
     return instr;
 }
 
-struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, struct Byte_Stream* byte_stream)
 {
   struct Instr instr = {.op=op};
 
@@ -91,7 +108,7 @@ struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_St
   const uint8_t r_m = bytes[1] & 0007;
 
   instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
-  instr.src = op_im(W, read_payload(W, byte_stream));
+  instr.src = op_im(W, read_payload(wide_im, byte_stream));
   return instr;
 }
 
