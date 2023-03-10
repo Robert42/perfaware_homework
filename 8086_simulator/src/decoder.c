@@ -3,6 +3,7 @@
 struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -41,18 +42,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   switch(bytes[0] & 0xf0)
   {
   case 0260: // Immediate to register
-  {
-    instr.op = MOV;
-
-    const bool W = bytes[0] & 0010;
-    const uint8_t reg = bytes[0] & 0007;
-
-    const union Payload data = read_payload(W, byte_stream);
-
-    instr.dest = op_reg(W, reg);
-    instr.src = op_im(W, data);
-    return instr;
-  }
+    return decode_instr_im2r(MOV, bytes, byte_stream);
   }
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
@@ -115,5 +105,19 @@ struct Instr decode_instr_im2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_St
 
   instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
   instr.src = op_im(W, read_payload(W, byte_stream));
+  return instr;
+}
+
+struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+{
+  struct Instr instr = {.op=op};
+
+  const bool W = bytes[0] & 0010;
+  const uint8_t reg = bytes[0] & 0007;
+
+  const union Payload data = read_payload(W, byte_stream);
+
+  instr.dest = op_reg(W, reg);
+  instr.src = op_im(W, data);
   return instr;
 }
