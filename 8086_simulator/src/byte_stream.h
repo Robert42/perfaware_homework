@@ -5,6 +5,8 @@ struct Byte_Stream
   const uint8_t* end;
 };
 
+size_t BYTES_READ = 0;
+
 void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
 {
   ASSERT(s->begin+n_bytes <= s->end, "unexpected end!");
@@ -14,7 +16,10 @@ void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
   if(LOG)
   {
     for(int i=0; i<n_bytes; ++i)
+    {
       fprintf(stderr, " %02X", s->begin[i]);
+      BYTES_READ++;
+    }
   }
   
   s->begin += n_bytes;

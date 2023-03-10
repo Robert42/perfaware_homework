@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
   LOG = strstr(filepath, "0041");
   if(LOG)
-    fprintf(stderr, "==== %s ====", filepath);
+    fprintf(stderr, "==== %s ====\n", filepath);
 
   // read file
   struct Byte_Stream byte_stream = {
@@ -63,8 +63,17 @@ int main(int argc, char** argv)
   while(byte_stream.begin < byte_stream.end)
   {
     if(LOG)
-      fprintf(stderr, "\n%4lu |", byte_stream.begin - bytes);
-    instr_print(instr_decode(&byte_stream), stdout);
+      fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
+    const struct Instr instr = instr_decode(&byte_stream);
+    instr_print(instr, stdout);
+    if(LOG)
+    {
+      for(; BYTES_READ < 6; ++BYTES_READ)
+        fprintf(stderr, " ..");
+      BYTES_READ = 0;
+      fprintf(stderr, " \t");
+      instr_print(instr, stderr);
+    }
   }
   if(LOG)
     fprintf(stderr, "\n");
