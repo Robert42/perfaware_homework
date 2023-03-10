@@ -12,7 +12,7 @@ sha256sum listing_0037_single_register_mov > binary.sha256
 sha256sum listing_0038_many_register_mov >> binary.sha256
 sha256sum listing_0039_more_movs >> binary.sha256
 sha256sum listing_0040_challenge_movs >> binary.sha256
-#sha256sum listing_0041_add_sub_cmp_jnz.asm >> binary.sha256
+sha256sum listing_0041_add_sub_cmp_jnz >> binary.sha256
 sha256sum -c binary.sha256
 
 cd src
