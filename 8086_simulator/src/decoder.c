@@ -40,11 +40,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0260: // Immediate to register
     return decode_instr_im2r(MOV, bytes, byte_stream);
-  }
-
-  switch(bytes[0] & 0300)
-  {
-  case 0100:
+  case 0x70:
     bytes[1] = read_u8(byte_stream);
     return (struct Instr){.op=JNZ, .ip_incr=bytes[1]};
   }
