@@ -1,10 +1,15 @@
+#define ARITH 0x80
+
 enum Instr_Op
 {
-  // arith
-  ADD = 0b000,
+  MOV,
 
-  MOV = 0x80,
+  // arith
+  ADD = ARITH | 0b000,
+
 };
+
+#undef ARITH
 
 struct Instr
 {
