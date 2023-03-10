@@ -30,8 +30,7 @@ bool LOG = false;
 #include "operand.c"
 #include "decoder.c"
 
-#define BUF_SIZE 4096
-uint8_t bytes[BUF_SIZE] = {}; // allocating MAX_INSTR_LEN more bytes so I can always copy bytes without having to worry about buffer boundaries
+uint8_t bytes[4096] = {}; // allocating MAX_INSTR_LEN more bytes so I can always copy bytes without having to worry about buffer boundaries
 
 int main(int argc, char** argv)
 {
@@ -51,9 +50,9 @@ int main(int argc, char** argv)
   {
     FILE* f = fopen(filepath, "rb");
     ASSERT(f != NULL, "Could not open: <%s> for reading\n", filepath);
-    byte_stream.end = byte_stream.begin + fread(bytes, 1, BUF_SIZE, f);
+    byte_stream.end = byte_stream.begin + fread(bytes, 1, ARRAY_LEN(bytes), f);
     fclose(f);
-    ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
+    ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%i)\n", filepath, ARRAY_LEN(bytes));
   }
 
   // output
