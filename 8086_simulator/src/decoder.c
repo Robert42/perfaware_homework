@@ -17,26 +17,25 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0306: // Immediate to register/memory
     return decode_instr_im2rm(MOV, bytes, byte_stream);
-  case 0240: // Memory to accumulator
-  case 0242: // Accumulator to memory
-  {
-    const bool acc_to_mem = (bytes[0] & 0xfe) == 0242;
-    instr.op = MOV;
-
-    const bool W = bytes[0] & 1;
-    instr.dest = op_reg(W, AL);
-    instr.src = op_addr_direct(read_u16(byte_stream));
-
-    if(acc_to_mem)
-      op_swap(&instr.dest, &instr.src);
-    return instr;
-  }
   }
 
   switch(bytes[0] & 0xfc)
   {
   case 0210: // Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
+  case 0240: // Memory to accumulator
+  {
+    const bool D = (bytes[0] & 2);
+    instr.op = MOV;
+
+    const bool W = bytes[0] & 1;
+    instr.dest = op_reg(W, AL);
+    instr.src = op_addr_direct(read_u16(byte_stream));
+
+    if(D)
+      op_swap(&instr.dest, &instr.src);
+    return instr;
+  }
   }
   
   switch(bytes[0] & 0xf0)
