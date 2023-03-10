@@ -1,6 +1,6 @@
 while true
 do
-  find . -iname '*.c' -or -iname '*.asm' | entr -d ./test.sh
+  find . -iname '*.c' -or -iname '*.h' -or -iname '*.asm' | entr -d ./test.sh
   if [ "$?" != 0 ]
   then
     continue
