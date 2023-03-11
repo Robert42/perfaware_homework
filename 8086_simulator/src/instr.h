@@ -13,7 +13,20 @@ enum Instr_Op
   // jump
   JZ  = JMP_OP | 0b0100,
   JL  = JMP_OP | 0b1100,
+  JLE = JMP_OP | 0b1110,
+  JB  = JMP_OP | 0b0010,
+  JBE = JMP_OP | 0b0110,
+  JPE = JMP_OP | 0b1010,
+  JO  = JMP_OP | 0b0000,
+  JS  = JMP_OP | 0b1000,
   JNZ = JMP_OP | 0b0101,
+  JGE = JMP_OP | 0b1101,
+  JG  = JMP_OP | 0b1111,
+  JAE = JMP_OP | 0b0011,
+  JA  = JMP_OP | 0b0111,
+  JPO = JMP_OP | 0b1011,
+  JNO = JMP_OP | 0b0001,
+  JNS = JMP_OP | 0b1001,
 };
 
 struct Instr

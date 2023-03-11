@@ -8,9 +8,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case CMP:
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
-  case JNZ:
-  case JZ:
-  case JL:
+  case JMP_OP ... JMP_OP | 0b1111:
     if(labels)
     {
       ASSERT(labels[curr_pos+instr.ip_incr] > 0);
@@ -35,9 +33,22 @@ const char* instr_op_str(enum Instr_Op op)
   case SUB: return "sub";
   case CMP: return "cmp";
 
-  case JNZ: return "jnz";
   case JZ: return "jz";
   case JL: return "jl";
+  case JLE: return "jle";
+  case JB: return "jb";
+  case JBE: return "jbe";
+  case JPE: return "jpe";
+  case JO: return "jo";
+  case JS: return "js";
+  case JNZ: return "jnz";
+  case JGE: return "jge";
+  case JG: return "jg";
+  case JAE: return "jae";
+  case JA: return "ja";
+  case JPO: return "jpo";
+  case JNO: return "jno";
+  case JNS: return "jns";
   }
 
   abort();
