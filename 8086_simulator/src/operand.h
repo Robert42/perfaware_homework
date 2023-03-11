@@ -72,3 +72,5 @@ struct Operand op_data8(uint8_t payload);
 struct Operand op_addr_direct(uint16_t addr);
 struct Operand op_addr_expr(enum Addr_Expr addr_expr);
 struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t displacement);
+
+bool op_is_addr(enum Operand_Variant op);

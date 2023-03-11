@@ -170,3 +170,23 @@ struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t
     .payload.wide = displacement,
   };
 }
+
+bool op_is_addr(enum Operand_Variant op)
+{
+  switch(op)
+  {
+  case OPERAND_REG:
+  case OPERAND_SEG_REG:
+  case OPERAND_DATA_8:
+  case OPERAND_DATA_16:
+    return false;
+  case OPERAND_ADDR_DIRECT:
+  case OPERAND_ADDR_EXPR:
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT:
+    return true;
+
+  case OPERAND_COUNT:
+    break;
+  }
+  UNREACHABLE();
+}

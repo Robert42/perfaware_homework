@@ -32,6 +32,14 @@ enum Instr_Op
   DIV,
   IDIV,
   NOT,
+
+  SHL,
+  SHR,
+  SAR,
+  ROL,
+  ROR,
+  RCL,
+  RCR,
   
   // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
   // https://en.wikipedia.org/wiki/Binary-coded_decimal

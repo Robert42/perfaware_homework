@@ -30,6 +30,13 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case LEA:
   case LES:
   case LDS:
+  case SHL:
+  case SHR:
+  case SAR:
+  case ROL:
+  case ROR:
+  case RCL:
+  case RCR:
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
   case INC:
@@ -107,6 +114,14 @@ const char* instr_op_str(enum Instr_Op op)
   case IMUL: return "imul";
   case DIV: return "div";
   case IDIV: return "idiv";
+
+  case SHL: return "shl";
+  case SHR: return "shr";
+  case SAR: return "sar";
+  case ROL: return "rol";
+  case ROR: return "ror";
+  case RCL: return "rcl";
+  case RCR: return "rcr";
 
   case JZ: return "jz";
   case JL: return "jl";

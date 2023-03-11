@@ -186,6 +186,54 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
       op_swap(&instr.dest, &instr.src);
     return instr;
   }
+  case 0320:
+  {
+    bytes[1] = read_u8(byte_stream);;
+
+    struct Instr instr = {};
+    switch(bytes[1]&0070)
+    {
+    case 0040:
+      instr.op = SHL;
+      break;
+    case 0050:
+      instr.op = SHR;
+      break;
+    case 0070:
+      instr.op = SAR;
+      break;
+    case 0000:
+      instr.op = ROL;
+      break;
+    case 0010:
+      instr.op = ROR;
+      break;
+    case 0020:
+      instr.op = RCL;
+      break;
+    case 0030:
+      instr.op = RCR;
+      break;
+    default:
+      UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
+    }
+
+    const bool V = bytes[0] & 2;
+    const bool W = bytes[0] & 1;
+
+    const uint8_t mod = (bytes[1] & 0300) >> 6;
+    const uint8_t r_m = bytes[1] & 0007;
+    instr.dest = decode_addr_expr(W, mod, r_m, byte_stream);
+    if(op_is_addr(instr.dest.variant))
+      instr.dest.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
+    
+    if(V == 0)
+      instr.src = op_data8(1);
+    else
+      instr.src = op_reg(false, CL);
+
+    return instr;
+  }
   }
 
   switch(bytes[0] & 0xf8)
@@ -229,7 +277,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
 
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
     return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
-
+  
   UNIMPLEMENTED("%03o", bytes[0]);
 }
 
