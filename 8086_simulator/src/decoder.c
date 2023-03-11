@@ -52,6 +52,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0057: return (struct Instr){.op = DAS};
   case 0230: return (struct Instr){.op = CBW};
   case 0231: return (struct Instr){.op = CWD};
+  case 0316: return (struct Instr){.op = INTO};
+  case 0317: return (struct Instr){.op = IRET};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);
@@ -93,12 +95,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_rm2rm_dw(op, true, true, bytes, byte_stream);
   }
   case 0302: // RET -- Within seg adding to SP
-  {
       return (struct Instr){.op = RET, .src = op_data16(read_u16(byte_stream))};
-  }
   case 0303: // RET -- Within seg adding to SP
-  {
       return (struct Instr){.op = RET};
+  case 0315: // int -- TYPE SPECIFIED
+  {
+      return (struct Instr){.op = INT, .src=op_data8(read_u8(byte_stream))};
   }
   }
   
