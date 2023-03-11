@@ -21,14 +21,20 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   switch(bytes[0])
   {
   case 0xff:
-    bytes[1] = read_u8(byte_stream);
+    bytes[1] = peek_u8(byte_stream);
     if((bytes[1]&0070) == 0060) // PUSH -- register/memory
+    {
+      bytes[1] = read_u8(byte_stream);
       return decode_rm(PUSH, bytes, byte_stream);
+    }
     break;
   case 0x8f:
-    bytes[1] = read_u8(byte_stream);
+    bytes[1] = peek_u8(byte_stream);
     if((bytes[1]&0070) == 0) // POP -- register/memory
+    {
+      bytes[1] = read_u8(byte_stream);
       return decode_rm(POP, bytes, byte_stream);
+    }
     break;
   case 0327: return (struct Instr){.op = XLAT};
   case 0237: return (struct Instr){.op = LAHF};
@@ -81,6 +87,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
 
       return instr;
     }
+    UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     break;
   }
   }
