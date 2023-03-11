@@ -131,9 +131,15 @@ struct Operand op_reg(bool W, uint8_t REG)
 
 struct Operand op_im(bool W, union Payload payload)
 {
+  struct Operand o = op_data(W, payload);
+  o.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
+  return o;
+}
+
+struct Operand op_data(bool W, union Payload payload)
+{
   return (struct Operand){
     .variant = W ? OPERAND_DATA_16 : OPERAND_DATA_8,
-    .expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8,
     .payload = payload,
   };
 }
@@ -143,6 +149,14 @@ struct Operand op_data8(uint8_t payload)
   return (struct Operand){
     .variant = OPERAND_DATA_8,
     .payload = {.lo = payload},
+  };
+}
+
+struct Operand op_data16(uint16_t payload)
+{
+  return (struct Operand){
+    .variant = OPERAND_DATA_16,
+    .payload.wide = payload,
   };
 }
 

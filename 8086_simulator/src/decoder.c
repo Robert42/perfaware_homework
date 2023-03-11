@@ -105,6 +105,11 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
   }
+  case 0250: // TEST -- Immediate data and accumulator
+  {
+    const bool W = bytes[0] & 1;
+    return (struct Instr){.op=TEST, .dest=op_reg(W, AL), .src=op_data(W, read_payload(W, byte_stream))};
+  }
   case 0376:
   {
     bytes[1] = peek_u8(byte_stream); // warning, peek, not read
