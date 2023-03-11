@@ -56,7 +56,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0306: // MOV -- Immediate to register/memory
   {
     const bool W = bytes[0] & 1;
-    bytes[1] = read_u8(byte_stream);
+    bytes[1] = peek_u8(byte_stream);
     return decode_instr_im2rm(MOV, W, bytes, byte_stream);
   }
   case 0206: // XCHG -- Register/memory to/from register
@@ -71,7 +71,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   // Arithmetic -- Immediate to register/memory
   case 0200:
     const bool wide_im = (bytes[0] & 3) == 1;
-    bytes[1] = read_u8(byte_stream);
+    bytes[1] = peek_u8(byte_stream);
     return decode_instr_im2rm(arith_op(bytes[1], 3), wide_im, bytes, byte_stream);
 
   case 0210: // MOV -- Register/memory to/from register
@@ -210,6 +210,7 @@ struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, 
 
   const bool W = bytes[0] & 1;
 
+  bytes[1] = read_u8(byte_stream);
   const uint8_t mod = (bytes[1] & 0300) >> 6;
   const uint8_t r_m = bytes[1] & 0007;
 

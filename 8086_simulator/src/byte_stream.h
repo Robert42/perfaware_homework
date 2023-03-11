@@ -44,6 +44,12 @@ uint16_t read_u16(struct Byte_Stream* s)
   return x;
 }
 
+uint8_t peek_u8(struct Byte_Stream* s)
+{
+  struct Byte_Stream peek = *s;
+  return read_u8(&peek);
+}
+
 union Payload read_payload(bool wide, struct Byte_Stream* s)
 {
   union Payload data = {};
