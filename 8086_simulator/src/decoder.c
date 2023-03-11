@@ -63,6 +63,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0373: return (struct Instr){.op = STI};
   case 0364: return (struct Instr){.op = HLT};
   case 0233: return (struct Instr){.op = WAIT};
+  case 0360: return (struct Instr){.op = LOCK};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);

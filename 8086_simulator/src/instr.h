@@ -70,6 +70,8 @@ enum Instr_Op
   STI,
   HLT,
   WAIT,
+  
+  LOCK,
 
   // arith
   ADD = ARITH_OP | 0b000,
