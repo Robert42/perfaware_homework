@@ -7,6 +7,7 @@ struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_St
 struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_unary_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 
 enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> rshift)) | ARITH_OP;}
 enum Instr_Op jmp_op(uint8_t encoded){return (encoded & 0x0f) | JMP_OP;}
@@ -77,19 +78,20 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     bytes[1] = peek_u8(byte_stream); // warning, peek, not read
     switch(bytes[1]&0070)
     {
-    case 0010: // INC -- Register/memory
+    case 0010: // DEC -- Register/memory
     case 0000: // INC -- Register/memory
-      struct Instr instr = {.op=(bytes[1]&0070) ? DEC : INC};
-      const bool W = bytes[0] & 1;
-
-      bytes[1] = read_u8(byte_stream); // we've only peeked above, now we actually move forward
-      const uint8_t mod = (bytes[1] & 0300) >> 6;
-      const uint8_t r_m = bytes[1] & 0007;
-
-      instr.src = decode_addr_expr(W, mod, r_m, byte_stream);
-      instr.src.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
-
-      return instr;
+      return decode_instr_unary_rm((bytes[1]&0070) ? DEC : INC, bytes, byte_stream);
+    }
+    UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
+    break;
+  }
+  case 0366:
+  {
+    bytes[1] = peek_u8(byte_stream); // warning, peek, not read
+    switch(bytes[1]&0070)
+    {
+    case 0030: // NEG -- Register/memory
+      return decode_instr_unary_rm(NEG, bytes, byte_stream);
     }
     UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     break;
@@ -280,5 +282,20 @@ struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_
 
   if(D)
     op_swap(&instr.dest, &instr.src);
+  return instr;
+}
+
+struct Instr decode_instr_unary_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
+{
+  struct Instr instr = {.op=op};
+  const bool W = bytes[0] & 1;
+
+  bytes[1] = read_u8(byte_stream); // we've only peeked above, now we actually move forward
+  const uint8_t mod = (bytes[1] & 0300) >> 6;
+  const uint8_t r_m = bytes[1] & 0007;
+
+  instr.src = decode_addr_expr(W, mod, r_m, byte_stream);
+  instr.src.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
+
   return instr;
 }
