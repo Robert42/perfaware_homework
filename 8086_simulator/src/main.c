@@ -19,6 +19,7 @@ bool LOG = false;
     } \
   } while(false)
 #define UNIMPLEMENTED(...) ASSERT(false, "UNIMPLEMENTED!\n" __VA_ARGS__)
+#define UNREACHABLE(...) abort()
 
 #define ARRAY_LEN(X) (sizeof(X) / sizeof(X[0]))
 

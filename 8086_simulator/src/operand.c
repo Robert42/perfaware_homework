@@ -28,7 +28,7 @@ static const char* reg_to_str(enum Reg reg)
     CASE(DI);
   }
 #undef CASE
-  abort();
+  UNREACHABLE();
 }
 
 static const char* addr_expr_to_str(enum Addr_Expr addr_expr)
@@ -65,10 +65,10 @@ const char* fmt_operand(struct Operand op)
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
   case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
   case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
-  case OPERAND_COUNT: abort();
+  case OPERAND_COUNT: UNREACHABLE();
   }
 
-  abort();
+  UNREACHABLE();
 
 done:
   START += strlen(text)+1;

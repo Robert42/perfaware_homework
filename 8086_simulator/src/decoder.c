@@ -87,7 +87,7 @@ struct Operand decode_addr_expr(bool W, uint8_t mod, uint8_t r_m, struct Byte_St
     return op_reg(W, r_m);
   }
 
-  abort();
+  UNREACHABLE();
 }
 
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)

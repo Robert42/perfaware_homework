@@ -21,7 +21,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     return;
   }
 
-  abort();
+  UNREACHABLE();
 }
 
 const char* instr_op_str(enum Instr_Op op)
@@ -56,7 +56,7 @@ const char* instr_op_str(enum Instr_Op op)
   case JCXZ: return "jcxz";
   }
 
-  abort();
+  UNREACHABLE();
 }
 
 bool has_label(enum Instr_Op op)
