@@ -1,10 +1,10 @@
 void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos)
 {
+  if(instr.lock)
+    fprintf(file, "lock ");
+
   switch(instr.op)
   {
-  case SEGMENT_OVERRIDE_PREFIX:
-    fprintf(file, "%s:\n", fmt_operand(instr.src));
-    return;
   case XLAT:
   case LAHF:
   case SAHF:
@@ -29,7 +29,6 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case STI:
   case HLT:
   case WAIT:
-  case LOCK:
     fprintf(file, "%s\n", instr_op_str(instr.op));
     return;
   case PUSH:
@@ -189,9 +188,6 @@ const char* instr_op_str(enum Instr_Op op)
   case LOOPZ: return "loopz";
   case LOOPNZ: return "loopnz";
   case JCXZ: return "jcxz";
-  
-  case LOCK: return "lock";
-  case SEGMENT_OVERRIDE_PREFIX: UNREACHABLE();
   }
 
   UNREACHABLE();

@@ -62,9 +62,17 @@ int main(int argc, char** argv)
 
   while(byte_stream.begin < byte_stream.end)
   {
+    bool was_prefix = false;
+
     if(LOG)
       fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
-    const struct Instr instr = instr_decode(&byte_stream);
+    const struct Instr instr = instr_decode(&byte_stream, &was_prefix);
+
+    if(was_prefix)
+    {
+      fprintf(stderr, "\n");
+      continue;
+    }
 
     const size_t curr_pos = byte_stream.begin-bytes;
     ASSERT(curr_pos < UINT16_MAX);
@@ -104,7 +112,9 @@ int main(int argc, char** argv)
         printf("label%" PRIu16 ":\n", LABELS[label_pos]-1);
     }
 
-    const struct Instr instr = instr_decode(&byte_stream);
-    instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
+    bool was_prefix = false;
+    const struct Instr instr = instr_decode(&byte_stream, &was_prefix);
+    if(!was_prefix)
+      instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
   }
 }

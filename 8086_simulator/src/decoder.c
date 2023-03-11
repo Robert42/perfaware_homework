@@ -13,7 +13,34 @@ enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> 
 enum Instr_Op jmp_op(uint8_t encoded){return (encoded & 0x0f) | JMP_OP;}
 enum Instr_Op loop_op(uint8_t encoded){return (encoded & 0x03) | LOOP_OP;}
 
-struct Instr instr_decode(struct Byte_Stream* byte_stream)
+struct Instr _instr_decode(struct Byte_Stream* byte_stream);
+
+struct Decode_Context
+{
+  bool lock_prefix : 1;
+  bool segment_override : 1;
+};
+
+// In a real application, I would make this thread local
+struct Decode_Context CURR_DECODE_CONTEXT = {}; 
+struct Decode_Context NEXT_DECODE_CONTEXT = {};
+
+struct Instr instr_decode(struct Byte_Stream* byte_stream, bool* was_prefix)
+{
+  struct Instr instr = _instr_decode(byte_stream);
+
+  if(was_prefix)
+    *was_prefix = NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.segment_override;
+
+  instr.lock = CURR_DECODE_CONTEXT.lock_prefix;
+
+  CURR_DECODE_CONTEXT = NEXT_DECODE_CONTEXT;
+  NEXT_DECODE_CONTEXT = (struct Decode_Context){};
+  
+  return instr;
+}
+
+struct Instr _instr_decode(struct Byte_Stream* byte_stream)
 {
   uint8_t bytes[6] = {};
   
@@ -63,7 +90,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0373: return (struct Instr){.op = STI};
   case 0364: return (struct Instr){.op = HLT};
   case 0233: return (struct Instr){.op = WAIT};
-  case 0360: return (struct Instr){.op = LOCK};
+  case 0360: NEXT_DECODE_CONTEXT = (struct Decode_Context){.lock_prefix=true,}; return (struct Instr){};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);
@@ -109,15 +136,13 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0303: // RET -- Within seg adding to SP
       return (struct Instr){.op = RET};
   case 0315: // int -- TYPE SPECIFIED
-  {
       return (struct Instr){.op = INT, .src=op_data8(read_u8(byte_stream))};
-  }
   case 216: // MOV -- Register/memory to segment register
     UNIMPLEMENTED();
   case 214: // MOV -- Segment register to register/memory
     UNIMPLEMENTED();
   case 056: // fmt_operand
-    return (struct Instr){.op = SEGMENT_OVERRIDE_PREFIX, .src=op_seg_reg(CS)};
+    NEXT_DECODE_CONTEXT = (struct Decode_Context){.segment_override=true,}; return (struct Instr){};
   }
   
   // ==== 1111 1110 ============================================================

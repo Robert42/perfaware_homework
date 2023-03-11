@@ -71,9 +71,6 @@ enum Instr_Op
   HLT,
   WAIT,
   
-  LOCK,
-  SEGMENT_OVERRIDE_PREFIX,
-
   // arith
   ADD = ARITH_OP | 0b000,
   ADC = ARITH_OP | 0b010, // add with carry
