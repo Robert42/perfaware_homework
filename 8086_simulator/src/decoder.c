@@ -67,6 +67,13 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
     return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
   
+  if((bytes[0] & 0b11100111) == 0b00100110)
+  {
+    const uint8_t seg_reg = (bytes[0]&0b00011000)>>3;
+    NEXT_DECODE_CONTEXT = (struct Decode_Context){.seg_override=true, .seg_override_reg=seg_reg};
+    return (struct Instr){};
+  }
+
   // ==== 1111 1111 ============================================================
   switch(bytes[0])
   {
@@ -159,9 +166,6 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
     UNIMPLEMENTED();
   case 214: // MOV -- Segment register to register/memory
     UNIMPLEMENTED();
-  case 056: // CS:* segment override prefix
-    NEXT_DECODE_CONTEXT = (struct Decode_Context){.seg_override=true, .seg_override_reg=CS};
-    return (struct Instr){};
   }
   
   // ==== 1111 1110 ============================================================
