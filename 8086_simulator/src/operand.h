@@ -40,6 +40,7 @@ enum Operand_Variant
   OPERAND_ADDR_EXPR_WITH_DISPLACEMENT,
   OPERAND_IMMEDIATE_8,
   OPERAND_IMMEDIATE_16,
+  OPERAND_DATA_8,
   
   OPERAND_COUNT,
 };
@@ -59,6 +60,7 @@ void op_swap(struct Operand* x, struct Operand* y);
 struct Operand op_reg(bool W, uint8_t REG);
 struct Operand op_seg_reg(uint8_t REG);
 struct Operand op_im(bool W, union Payload payload);
+struct Operand op_data8(uint8_t payload);
 struct Operand op_addr_direct(uint16_t addr);
 struct Operand op_addr_expr(enum Addr_Expr addr_expr);
 struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t displacement);

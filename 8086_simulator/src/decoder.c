@@ -45,16 +45,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
   }
-  case 0344: // IN -- fixed port
-  {
-    const bool W = bytes[0] & 1;
-    return (struct Instr){.op=IN, .dest=op_reg(W, AL), .src=op_im(W, read_payload(W, byte_stream))};
-  }
-  case 0354: // IN -- variable port
-  {
-    const bool W = bytes[0] & 1;
-    return (struct Instr){.op=IN, .dest=op_reg(W, AL), .src=op_reg(true, DL)};
-  }
   }
 
   switch(bytes[0] & 0xfc)
@@ -73,6 +63,25 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0340: // Loop
     bytes[1] = read_u8(byte_stream);
     return (struct Instr){.op=loop_op(bytes[0]), .ip_incr=bytes[1]};
+
+  case 0344: // IN/OUT -- fixed port
+  {
+    const bool W = bytes[0] & 1;
+    const bool O = bytes[0] & 2;
+    struct Instr instr = {.op=O?OUT:IN , .dest=op_reg(W, AL), .src=op_data8(read_u8(byte_stream))};
+    if(O)
+      op_swap(&instr.dest, &instr.src);
+    return instr;
+  }
+  case 0354: // IN/OUT -- variable port
+  {
+    const bool W = bytes[0] & 1;
+    const bool O = bytes[0] & 2;
+    struct Instr instr = {.op=O?OUT:IN, .dest=op_reg(W, AL), .src=op_reg(true, DL)};
+    if(O)
+      op_swap(&instr.dest, &instr.src);
+    return instr;
+  }
   }
 
   switch(bytes[0] & 0xf8)

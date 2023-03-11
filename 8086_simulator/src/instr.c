@@ -10,6 +10,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case MOV:
   case XCHG:
   case IN:
+  case OUT:
   case ADD:
   case SUB:
   case CMP:
@@ -43,6 +44,7 @@ const char* instr_op_str(enum Instr_Op op)
   case XCHG: return "xchg";
   
   case IN: return "in";
+  case OUT: return "out";
 
   case ADD: return "add";
   case SUB: return "sub";

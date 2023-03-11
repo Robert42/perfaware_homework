@@ -82,6 +82,7 @@ const char* fmt_operand(struct Operand op)
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
   case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
   case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
+  case OPERAND_DATA_8: sprintf(text, "%" PRIu8, op.payload.lo); goto done;
   case OPERAND_COUNT: UNREACHABLE();
   }
 
@@ -120,6 +121,14 @@ struct Operand op_im(bool W, union Payload payload)
 {
   return (struct Operand){
     .variant = W ? OPERAND_IMMEDIATE_16 : OPERAND_IMMEDIATE_8,
+    .payload = payload,
+  };
+}
+
+struct Operand op_data8(uint8_t payload)
+{
+  return (struct Operand){
+    .variant = OPERAND_DATA_8,
     .payload = payload,
   };
 }
