@@ -141,6 +141,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     case 0070: // IDIV -- integer multiply signed
       op = IDIV;
       break;
+    case 0020: // NOT -- invert
+      op = NOT;
+      break;
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }

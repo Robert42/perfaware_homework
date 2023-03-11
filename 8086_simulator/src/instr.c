@@ -35,6 +35,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case INC:
   case DEC:
   case NEG:
+  case NOT:
   case MUL:
   case IMUL:
   case DIV:
@@ -88,6 +89,7 @@ const char* instr_op_str(enum Instr_Op op)
   case INC: return "inc";
   case DEC: return "dec";
   case NEG: return "neg";
+  case NOT: return "not";
   
   case AAA: return "aaa";
   case DAA: return "daa";
