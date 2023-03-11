@@ -7,6 +7,8 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case SAHF:
   case PUSHF:
   case POPF:
+  case AAA:
+  case DAA:
     fprintf(file, "%s\n", instr_op_str(instr.op));
     return;
   case PUSH:
@@ -72,6 +74,9 @@ const char* instr_op_str(enum Instr_Op op)
   case POPF: return "popf";
 
   case INC: return "inc";
+  
+  case AAA: return "aaa";
+  case DAA: return "daa";
 
   case ADD: return "add";
   case ADC: return "adc";

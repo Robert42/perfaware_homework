@@ -1,6 +1,6 @@
-#define ARITH_OP 0x10
-#define JMP_OP 0x20
-#define LOOP_OP 0x30
+#define ARITH_OP 0xD0
+#define JMP_OP 0xE0
+#define LOOP_OP 0xF0
 
 enum Instr_Op
 {
@@ -22,6 +22,11 @@ enum Instr_Op
   POPF,
 
   INC,
+  
+  // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
+  // https://en.wikipedia.org/wiki/Binary-coded_decimal
+  AAA,
+  DAA,
 
   // arith
   ADD = ARITH_OP | 0b000,
