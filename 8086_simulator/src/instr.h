@@ -1,6 +1,6 @@
+#define JMP_OP 0x40
 #define ARITH_OP 0x50
-#define JMP_OP 0x60
-#define LOOP_OP 0x70
+#define LOOP_OP 0x58
 
 enum Instr_Op
 {
@@ -110,7 +110,8 @@ enum Instr_Op
 
 struct Instr
 {
-  enum Instr_Op op;
+  enum Instr_Op op : 7;
+  bool lock : 1;
   union
   {
     struct{
