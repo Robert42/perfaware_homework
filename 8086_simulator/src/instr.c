@@ -11,6 +11,8 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case DAA:
   case AAS:
   case DAS:
+  case AAM:
+  case AAD:
     fprintf(file, "%s\n", instr_op_str(instr.op));
     return;
   case PUSH:
@@ -33,6 +35,8 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case NEG:
   case MUL:
   case IMUL:
+  case DIV:
+  case IDIV:
     fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
   case JMP_OP ... JMP_OP | 0b1111:
@@ -84,6 +88,8 @@ const char* instr_op_str(enum Instr_Op op)
   case DAA: return "daa";
   case AAS: return "aas";
   case DAS: return "das";
+  case AAM: return "aam";
+  case AAD: return "aad";
 
   case ADD: return "add";
   case ADC: return "adc";
@@ -92,6 +98,8 @@ const char* instr_op_str(enum Instr_Op op)
   case CMP: return "cmp";
   case MUL: return "mul";
   case IMUL: return "imul";
+  case DIV: return "div";
+  case IDIV: return "idiv";
 
   case JZ: return "jz";
   case JL: return "jl";

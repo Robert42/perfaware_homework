@@ -26,6 +26,8 @@ enum Instr_Op
   NEG,
   MUL,
   IMUL,
+  DIV,
+  IDIV,
   
   // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
   // https://en.wikipedia.org/wiki/Binary-coded_decimal
@@ -33,6 +35,8 @@ enum Instr_Op
   DAA,
   AAS,
   DAS,
+  AAM,
+  AAD,
 
   // arith
   ADD = ARITH_OP | 0b000,

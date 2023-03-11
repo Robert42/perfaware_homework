@@ -46,6 +46,32 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0047: return (struct Instr){.op = DAA};
   case 0077: return (struct Instr){.op = AAS};
   case 0057: return (struct Instr){.op = DAS};
+  case 0324:
+  {
+    bytes[1] = peek_u8(byte_stream);
+    switch(bytes[1])
+    {
+    case 012:
+    {
+      bytes[1] = read_u8(byte_stream);
+      return (struct Instr){.op = AAM, };
+    }
+    }
+    break;
+  }
+  case 0325:
+  {
+    bytes[1] = peek_u8(byte_stream);
+    switch(bytes[1])
+    {
+    case 012:
+    {
+      bytes[1] = read_u8(byte_stream);
+      return (struct Instr){.op = AAD, };
+    }
+    }
+    break;
+  }
   case 0215:
   case 0305:
   case 0304:
@@ -106,6 +132,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
       break;
     case 0050: // IMUL -- integer multiply signed
       op = IMUL;
+      break;
+    case 0060: // DIV -- multiply unsigned
+      op = DIV;
+      break;
+    case 0070: // IDIV -- integer multiply signed
+      op = IDIV;
       break;
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
