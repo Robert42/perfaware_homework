@@ -32,6 +32,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case DEC:
   case NEG:
   case MUL:
+  case IMUL:
     fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
   case JMP_OP ... JMP_OP | 0b1111:
@@ -90,6 +91,7 @@ const char* instr_op_str(enum Instr_Op op)
   case SBB: return "sbb";
   case CMP: return "cmp";
   case MUL: return "mul";
+  case IMUL: return "imul";
 
   case JZ: return "jz";
   case JL: return "jl";

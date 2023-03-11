@@ -25,6 +25,7 @@ enum Instr_Op
   DEC,
   NEG,
   MUL,
+  IMUL,
   
   // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
   // https://en.wikipedia.org/wiki/Binary-coded_decimal

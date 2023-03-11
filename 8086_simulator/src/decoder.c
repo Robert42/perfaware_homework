@@ -104,6 +104,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     case 0040: // MUL -- multiply unsigned
       op = MUL;
       break;
+    case 0050: // IMUL -- integer multiply signed
+      op = IMUL;
+      break;
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }
