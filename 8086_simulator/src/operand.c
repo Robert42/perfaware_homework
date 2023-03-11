@@ -72,6 +72,18 @@ const char* fmt_operand(struct Operand op)
     START = 0;
 
   char* text = RING_BUFFER + START;
+
+  switch(op.expl_size)
+  {
+  case OP_EXPL_SIZE_U8:
+    text += sprintf(text, "byte ");
+    break;
+  case OP_EXPL_SIZE_U16:
+    text += sprintf(text, "word ");
+    break;
+  case OP_EXPL_SIZE_NONE:
+    break;
+  }
   
   switch(op.variant)
   {
@@ -80,8 +92,7 @@ const char* fmt_operand(struct Operand op)
   case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
   case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); goto done;
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
-  case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
-  case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
+  case OPERAND_DATA_16: sprintf(text, "%" PRIu16, op.payload.wide); goto done;
   case OPERAND_DATA_8: sprintf(text, "%" PRIu8, op.payload.lo); goto done;
   case OPERAND_COUNT: UNREACHABLE();
   }
@@ -89,6 +100,7 @@ const char* fmt_operand(struct Operand op)
   UNREACHABLE();
 
 done:
+  text = RING_BUFFER + START;
   START += strlen(text)+1;
   ASSERT(START < ARRAY_LEN(RING_BUFFER));
   return text;
@@ -120,7 +132,8 @@ struct Operand op_reg(bool W, uint8_t REG)
 struct Operand op_im(bool W, union Payload payload)
 {
   return (struct Operand){
-    .variant = W ? OPERAND_IMMEDIATE_16 : OPERAND_IMMEDIATE_8,
+    .variant = W ? OPERAND_DATA_16 : OPERAND_DATA_8,
+    .expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8,
     .payload = payload,
   };
 }

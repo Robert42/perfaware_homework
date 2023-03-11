@@ -71,12 +71,13 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     {
       struct Instr instr = {.op=INC};
       const bool W = bytes[0] & 1;
-      
+
       bytes[1] = read_u8(byte_stream); // we've only peeked above, now we actually move forward
       const uint8_t mod = (bytes[1] & 0300) >> 6;
       const uint8_t r_m = bytes[1] & 0007;
 
       instr.src = decode_addr_expr(W, mod, r_m, byte_stream);
+      instr.src.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
 
       return instr;
     }

@@ -38,15 +38,23 @@ enum Operand_Variant
   OPERAND_ADDR_DIRECT,
   OPERAND_ADDR_EXPR,
   OPERAND_ADDR_EXPR_WITH_DISPLACEMENT,
-  OPERAND_IMMEDIATE_8,
-  OPERAND_IMMEDIATE_16,
   OPERAND_DATA_8,
+  OPERAND_DATA_16,
   
   OPERAND_COUNT,
 };
+
+enum Operand_Expl_Size
+{
+  OP_EXPL_SIZE_NONE,
+  OP_EXPL_SIZE_U8,
+  OP_EXPL_SIZE_U16,
+};
+
 struct Operand
 {
-  enum Operand_Variant variant;
+  enum Operand_Variant variant : 6;
+  enum Operand_Expl_Size expl_size : 2;
   union
   {
     enum Reg reg;
