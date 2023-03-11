@@ -40,19 +40,24 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream, bool* was_prefix)
       instr.src.seg_override = true;
       instr.src.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
     }
-    /* untested
     if(op_is_addr(instr.dest.variant))
     {
       instr.dest.seg_override = true;
       instr.dest.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
     }
-    */
   }
 
-  if(was_prefix)
-    *was_prefix = NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.seg_override;
 
-  CURR_DECODE_CONTEXT = NEXT_DECODE_CONTEXT;
+  if(NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.seg_override)
+  {
+    *was_prefix = true;
+    NEXT_DECODE_CONTEXT.lock_prefix = CURR_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.lock_prefix;
+    CURR_DECODE_CONTEXT = NEXT_DECODE_CONTEXT;
+  }else
+  {
+    *was_prefix = false;
+    CURR_DECODE_CONTEXT = (struct Decode_Context){};
+  }
   NEXT_DECODE_CONTEXT = (struct Decode_Context){};
   
   return instr;

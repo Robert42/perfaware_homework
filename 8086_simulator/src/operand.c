@@ -74,9 +74,6 @@ const char* fmt_operand(struct Operand op)
 
   char* text = RING_BUFFER + START;
 
-  if(op.seg_override)
-    text += sprintf(text, "%s:", seg_reg_to_str(op.seg_override_reg));
-
   switch(op.expl_size)
   {
   case OP_EXPL_SIZE_U8:
@@ -88,6 +85,9 @@ const char* fmt_operand(struct Operand op)
   case OP_EXPL_SIZE_NONE:
     break;
   }
+
+  if(op.seg_override)
+    text += sprintf(text, "%s:", seg_reg_to_str(op.seg_override_reg));
   
   switch(op.variant)
   {
