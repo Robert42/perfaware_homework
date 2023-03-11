@@ -17,6 +17,15 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case CWD:
   case INTO:
   case IRET:
+  case CLC:
+  case CMC:
+  case STC:
+  case CLD:
+  case STD:
+  case CLI:
+  case STI:
+  case HLT:
+  case WAIT:
     fprintf(file, "%s\n", instr_op_str(instr.op));
     return;
   case PUSH:
@@ -124,6 +133,16 @@ const char* instr_op_str(enum Instr_Op op)
   
   case INTO: return "into";
   case IRET: return "iret";
+
+  case CLC: return "clc";
+  case CMC: return "cmc";
+  case STC: return "stc";
+  case CLD: return "cld";
+  case STD: return "std";
+  case CLI: return "cli";
+  case STI: return "sti";
+  case HLT: return "hlt";
+  case WAIT: return "wait";
 
   case ADD: return "add";
   case ADC: return "adc";

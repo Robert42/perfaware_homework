@@ -60,6 +60,16 @@ enum Instr_Op
   
   INTO,
   IRET,
+  
+  CLC,
+  CMC,
+  STC,
+  CLD,
+  STD,
+  CLI,
+  STI,
+  HLT,
+  WAIT,
 
   // arith
   ADD = ARITH_OP | 0b000,

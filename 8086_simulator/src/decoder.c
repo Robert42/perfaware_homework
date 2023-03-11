@@ -54,6 +54,15 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0231: return (struct Instr){.op = CWD};
   case 0316: return (struct Instr){.op = INTO};
   case 0317: return (struct Instr){.op = IRET};
+  case 0370: return (struct Instr){.op = CLC};
+  case 0365: return (struct Instr){.op = CMC};
+  case 0371: return (struct Instr){.op = STC};
+  case 0374: return (struct Instr){.op = CLD};
+  case 0375: return (struct Instr){.op = STD};
+  case 0372: return (struct Instr){.op = CLI};
+  case 0373: return (struct Instr){.op = STI};
+  case 0364: return (struct Instr){.op = HLT};
+  case 0233: return (struct Instr){.op = WAIT};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);
