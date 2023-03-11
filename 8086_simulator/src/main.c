@@ -30,8 +30,7 @@ bool LOG = false;
 #include "operand.c"
 #include "decoder.c"
 
-#define BUF_SIZE 4096
-uint8_t bytes[BUF_SIZE] = {}; // allocating MAX_INSTR_LEN more bytes so I can always copy bytes without having to worry about buffer boundaries
+uint8_t bytes[4096] = {}; // allocating MAX_INSTR_LEN more bytes so I can always copy bytes without having to worry about buffer boundaries
 
 int main(int argc, char** argv)
 {
@@ -51,30 +50,60 @@ int main(int argc, char** argv)
   {
     FILE* f = fopen(filepath, "rb");
     ASSERT(f != NULL, "Could not open: <%s> for reading\n", filepath);
-    byte_stream.end = byte_stream.begin + fread(bytes, 1, BUF_SIZE, f);
+    byte_stream.end = byte_stream.begin + fread(bytes, 1, ARRAY_LEN(bytes), f);
     fclose(f);
-    ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%i)\n", filepath, BUF_SIZE);
+    ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%lu)\n", filepath, ARRAY_LEN(bytes));
   }
 
-  // output
-  printf("; %s\n", filepath);
-  printf("bits 16\n\n");
+  // == first pass finding the labels (and debug printing) ==
+  uint16_t num_labels = 0;
+  uint16_t LABELS[ARRAY_LEN(bytes)] = {};
 
   while(byte_stream.begin < byte_stream.end)
   {
     if(LOG)
       fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
     const struct Instr instr = instr_decode(&byte_stream);
-    instr_print(instr, stdout);
+
+    const size_t curr_pos = byte_stream.begin-bytes;
+    ASSERT(curr_pos < UINT16_MAX);
+    if(has_label(instr.op))
+    {
+      if(LABELS[curr_pos+instr.ip_incr] == 0)
+      {
+        ASSERT(num_labels < UINT16_MAX);
+        LABELS[curr_pos+instr.ip_incr] = ++num_labels;
+      }
+    }
+
     if(LOG)
     {
       for(; BYTES_READ < 6; ++BYTES_READ)
         fprintf(stderr, "    " + (LOG_BYTES==LB_HEX));
       BYTES_READ = 0;
       fprintf(stderr, "\t\t");
-      instr_print(instr, stderr);
+      instr_print(instr, stderr, NULL, SIZE_MAX);
     }
   }
   if(LOG)
     fprintf(stderr, "\n");
+  LOG = false;
+  
+  // == second pass with the actual output ==
+
+  printf("; %s\n", filepath);
+  printf("bits 16\n\n");
+
+  byte_stream.begin = bytes;
+  while(byte_stream.begin < byte_stream.end)
+  {
+    {
+      const size_t label_pos = byte_stream.begin-bytes;
+      if(LABELS[label_pos] != 0)
+        printf("label%" PRIu16 ":\n", LABELS[label_pos]-1);
+    }
+
+    const struct Instr instr = instr_decode(&byte_stream);
+    instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
+  }
 }
