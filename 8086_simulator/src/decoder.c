@@ -75,9 +75,11 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0376:
   {
     bytes[1] = peek_u8(byte_stream); // warning, peek, not read
-    if((bytes[1]&0070) == 0000) // INC -- Register/memory
+    switch(bytes[1]&0070)
     {
-      struct Instr instr = {.op=INC};
+    case 0010: // INC -- Register/memory
+    case 0000: // INC -- Register/memory
+      struct Instr instr = {.op=(bytes[1]&0070) ? DEC : INC};
       const bool W = bytes[0] & 1;
 
       bytes[1] = read_u8(byte_stream); // we've only peeked above, now we actually move forward
@@ -137,6 +139,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return (struct Instr){.op=XCHG, .dest=op_reg(true, AL), .src=op_reg(true, bytes[0]&7)};
   case 0100: // INC -- Register
     return (struct Instr){.op=INC, .src=op_reg(true, bytes[0]&7)};
+  case 0110: // DEC -- Register
+    return (struct Instr){.op=DEC, .src=op_reg(true, bytes[0]&7)};
   }
 
   switch(bytes[0] & 0xf0)

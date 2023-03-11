@@ -22,6 +22,7 @@ enum Instr_Op
   POPF,
 
   INC,
+  DEC,
   
   // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
   // https://en.wikipedia.org/wiki/Binary-coded_decimal
@@ -33,6 +34,7 @@ enum Instr_Op
   ADC = ARITH_OP | 0b010, // add with carry
   SUB = ARITH_OP | 0b101,
   CMP = ARITH_OP | 0b111,
+  SBB = ARITH_OP | 0b011,
 
   // jump
   JZ  = JMP_OP | 0b0100,
