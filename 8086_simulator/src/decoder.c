@@ -50,6 +50,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     bytes[1] = read_u8(byte_stream);
     return (struct Instr){.op=loop_op(bytes[0]), .ip_incr=bytes[1]};
   }
+
+  switch(bytes[0] & 0xf8)
+  {
+  case 0120: // PUSH - register
+    return (struct Instr){.op=PUSH, .src=op_reg(true, bytes[0]&7)};
+  }
   
   switch(bytes[0] & 0xf0)
   {
@@ -59,6 +65,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     bytes[1] = read_u8(byte_stream);
     return (struct Instr){.op=jmp_op(bytes[0]), .ip_incr=bytes[1]};
   }
+
+  if((bytes[0] & 0b11100111) == 0b110) // PUSH -- segment register
+    return (struct Instr){.op=PUSH, .src=op_seg_reg(3 & (bytes[0]>>3))};
 
   // Immediate to accumulator
   if((bytes[0] & 0b11000100) == 0b100)
@@ -103,7 +112,7 @@ struct Instr decode_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byt
 {
   struct Instr instr = {.op=op};
 
-  const W = true;
+  const bool W = true;
 
   const uint8_t mod = (bytes[1] & 0300) >> 6;
   const uint8_t r_m = bytes[1] & 0007;

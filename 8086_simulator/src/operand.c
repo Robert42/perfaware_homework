@@ -27,9 +27,25 @@ static const char* reg_to_str(enum Reg reg)
     CASE(SI);
     CASE(DI);
   }
-#undef CASE
   UNREACHABLE();
 }
+
+enum Seg_Reg seg_reg_decode(uint8_t REG)
+{
+  ASSERT(REG < 4);
+  ASSERT(REG == 1);
+  return REG;
+}
+
+const char* seg_reg_to_str(enum Seg_Reg reg)
+{
+  switch(reg)
+  {
+    CASE(CS);
+  }
+  UNREACHABLE();
+}
+#undef CASE
 
 static const char* addr_expr_to_str(enum Addr_Expr addr_expr)
 {
@@ -58,8 +74,8 @@ const char* fmt_operand(struct Operand op)
   
   switch(op.variant)
   {
-  case OPERAND_REG:
-    return reg_to_str(op.reg);
+  case OPERAND_REG: return reg_to_str(op.reg);
+  case OPERAND_SEG_REG: return seg_reg_to_str(op.reg);
   case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
   case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); goto done;
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
@@ -81,6 +97,14 @@ void op_swap(struct Operand* x, struct Operand* y)
   struct Operand tmp = *x;
   *x = *y;
   *y = tmp;
+}
+
+struct Operand op_seg_reg(uint8_t REG)
+{
+  return (struct Operand){
+    .variant = OPERAND_SEG_REG,
+    .reg = seg_reg_decode(REG),
+  };
 }
 
 struct Operand op_reg(bool W, uint8_t REG)
