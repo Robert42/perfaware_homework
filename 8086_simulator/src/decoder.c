@@ -175,7 +175,10 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
   case 0206: // XCHG -- Register/memory to/from register
   {
     const bool W = bytes[0] & 1;
-    return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
+    struct Instr instr = decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
+    if(op_is_addr(instr.src.variant))
+      op_swap(&instr.dest, &instr.src);
+    return instr;
   }
   case 0250: // TEST -- Immediate data and accumulator
   {
