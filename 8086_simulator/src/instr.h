@@ -1,6 +1,6 @@
-#define ARITH_OP 0xD0
-#define JMP_OP 0xE0
-#define LOOP_OP 0xF0
+#define ARITH_OP 0x50
+#define JMP_OP 0x60
+#define LOOP_OP 0x70
 
 enum Instr_Op
 {
