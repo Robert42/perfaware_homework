@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
     const size_t curr_pos = byte_stream.begin-bytes;
     ASSERT(curr_pos < UINT16_MAX);
-    if(is_jmp(instr.op))
+    if(has_label(instr.op))
     {
       if(LABELS[curr_pos+instr.ip_incr] == 0)
       {

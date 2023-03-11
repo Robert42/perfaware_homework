@@ -8,6 +8,7 @@ struct Instr decode_instr_mem_acc(enum Instr_Op op, uint8_t* bytes, struct Byte_
 
 enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> rshift)) | ARITH_OP;}
 enum Instr_Op jmp_op(uint8_t encoded){return (encoded & 0x0f) | JMP_OP;}
+enum Instr_Op loop_op(uint8_t encoded){return (encoded & 0x03) | LOOP_OP;}
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream)
 {
@@ -35,6 +36,10 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
   case 0240: // Memory to/from accumulator
     return decode_instr_mem_acc(MOV, bytes, byte_stream);
+  
+  case 0340: // Loop
+    bytes[1] = read_u8(byte_stream);
+    return (struct Instr){.op=loop_op(bytes[0]), .ip_incr=bytes[1]};
   }
   
   switch(bytes[0] & 0xf0)

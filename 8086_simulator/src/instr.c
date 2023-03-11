@@ -9,6 +9,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
   case JMP_OP ... JMP_OP | 0b1111:
+  case LOOP_OP ... LOOP_OP | 0b0011:
     if(labels)
     {
       ASSERT(labels[curr_pos+instr.ip_incr] > 0);
@@ -49,12 +50,23 @@ const char* instr_op_str(enum Instr_Op op)
   case JPO: return "jpo";
   case JNO: return "jno";
   case JNS: return "jns";
+  case LOOP: return "loop";
+  case LOOPZ: return "loopz";
+  case LOOPNZ: return "loopnz";
+  case JCXZ: return "jcxz";
   }
 
   abort();
 }
 
-bool is_jmp(enum Instr_Op op)
+bool has_label(enum Instr_Op op)
 {
-  return (0xf0 & op) == JMP_OP;
+  switch(op)
+  {
+  case JMP_OP ... JMP_OP | 0b1111:
+  case LOOP_OP ... LOOP_OP | 0b0011:
+    return true;
+  default:
+    return false;
+  }
 }

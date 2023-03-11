@@ -1,5 +1,6 @@
 #define ARITH_OP 0x10
 #define JMP_OP 0x20
+#define LOOP_OP 0x30
 
 enum Instr_Op
 {
@@ -27,6 +28,11 @@ enum Instr_Op
   JPO = JMP_OP | 0b1011,
   JNO = JMP_OP | 0b0001,
   JNS = JMP_OP | 0b1001,
+
+  LOOP   = LOOP_OP | 2,
+  LOOPZ  = LOOP_OP | 1,
+  LOOPNZ = LOOP_OP | 0,
+  JCXZ   = LOOP_OP | 3,
 };
 
 struct Instr
@@ -43,4 +49,4 @@ struct Instr
 };
 void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos);
 const char* instr_op_str(enum Instr_Op op);
-bool is_jmp(enum Instr_Op op);
+bool has_label(enum Instr_Op op);
