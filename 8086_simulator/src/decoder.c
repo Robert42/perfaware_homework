@@ -32,6 +32,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     break;
   case 0327:
     return (struct Instr){.op = XLAT};
+  case 0215:
+    return decode_instr_rm2rm_dw(LEA, true, true, bytes, byte_stream);
   }
   
   switch(bytes[0] & 0xfe)

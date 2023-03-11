@@ -11,6 +11,8 @@ enum Instr_Op
   IN, // read from port
   OUT, // write to port
   XLAT,
+  
+  LEA, // https://stackoverflow.com/a/1665570/2301866
 
   // arith
   ADD = ARITH_OP | 0b000,
