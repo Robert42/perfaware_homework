@@ -21,6 +21,8 @@ enum Instr_Op
   PUSHF,
   POPF,
 
+  INC,
+
   // arith
   ADD = ARITH_OP | 0b000,
   ADC = ARITH_OP | 0b010, // add with carry

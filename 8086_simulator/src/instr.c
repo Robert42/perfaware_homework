@@ -27,6 +27,9 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case LDS:
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
+  case INC:
+    fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
+    return;
   case JMP_OP ... JMP_OP | 0b1111:
   case LOOP_OP ... LOOP_OP | 0b0011:
     if(labels)
@@ -67,6 +70,8 @@ const char* instr_op_str(enum Instr_Op op)
   case SAHF: return "sahf";
   case PUSHF: return "pushf";
   case POPF: return "popf";
+
+  case INC: return "inc";
 
   case ADD: return "add";
   case ADC: return "adc";

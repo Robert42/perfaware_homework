@@ -64,6 +64,24 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
   }
+  case 0376:
+  {
+    bytes[1] = peek_u8(byte_stream); // warning, peek, not read
+    if((bytes[1]&0070) == 0000) // INC -- Register/memory
+    {
+      struct Instr instr = {.op=INC};
+      const bool W = bytes[0] & 1;
+      
+      bytes[1] = read_u8(byte_stream); // we've only peeked above, now we actually move forward
+      const uint8_t mod = (bytes[1] & 0300) >> 6;
+      const uint8_t r_m = bytes[1] & 0007;
+
+      instr.src = decode_addr_expr(W, mod, r_m, byte_stream);
+
+      return instr;
+    }
+    break;
+  }
   }
 
   switch(bytes[0] & 0xfc)
@@ -107,6 +125,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0220: // XCHG -- Register with accumulator
     return (struct Instr){.op=XCHG, .dest=op_reg(true, AL), .src=op_reg(true, bytes[0]&7)};
+  case 0100: // INC -- Register
+    return (struct Instr){.op=INC, .src=op_reg(true, bytes[0]&7)};
   }
 
   switch(bytes[0] & 0xf0)
