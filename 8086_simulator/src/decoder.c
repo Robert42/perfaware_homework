@@ -178,6 +178,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
   case 0240: // MOV -- Memory to/from accumulator
     return decode_instr_mem_acc(MOV, bytes, byte_stream);
+
+  case 0204: // TEST -- Register/memory and register
+    return decode_instr_rm2rm(TEST, bytes, byte_stream);
   
   case 0340: // Loop
     bytes[1] = read_u8(byte_stream);
