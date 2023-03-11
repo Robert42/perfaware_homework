@@ -129,7 +129,7 @@ struct Operand op_data8(uint8_t payload)
 {
   return (struct Operand){
     .variant = OPERAND_DATA_8,
-    .payload = payload,
+    .payload = {.lo = payload},
   };
 }
 
