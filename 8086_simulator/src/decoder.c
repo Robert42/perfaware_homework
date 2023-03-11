@@ -45,6 +45,16 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
   }
+  case 0344: // IN -- fixed port
+  {
+    const bool W = bytes[0] & 1;
+    return (struct Instr){.op=IN, .dest=op_reg(W, AL), .src=op_im(W, read_payload(W, byte_stream))};
+  }
+  case 0354: // IN -- variable port
+  {
+    const bool W = bytes[0] & 1;
+    return (struct Instr){.op=IN, .dest=op_reg(W, AL), .src=op_reg(true, DL)};
+  }
   }
 
   switch(bytes[0] & 0xfc)
