@@ -18,6 +18,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   uint8_t bytes[6] = {};
   
   bytes[0] = read_u8(byte_stream);
+
+  if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
+    return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
   
   switch(bytes[0])
   {
@@ -95,7 +98,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0306: // MOV -- Immediate to register/memory
   {
     const bool W = bytes[0] & 1;
-    bytes[1] = peek_u8(byte_stream);
     return decode_instr_im2rm(MOV, W, bytes, byte_stream);
   }
   case 0206: // XCHG -- Register/memory to/from register
@@ -144,6 +146,11 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     case 0020: // NOT -- invert
       op = NOT;
       break;
+    case 0: // TEST -- Immediate to register/memory
+    {
+      const bool W = bytes[0] & 1;
+      return decode_instr_im2rm(TEST, W, bytes, byte_stream);
+    }
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }
@@ -234,6 +241,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
 
     return instr;
   }
+  case 0020: // TEST -- Register/memory to either
+    UNIMPLEMENTED("TEST");
+    return decode_instr_rm2rm(TEST, bytes, byte_stream);
   }
 
   switch(bytes[0] & 0xf8)
@@ -274,9 +284,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     instr.src = op_im(W, data);
     return instr;
   }
-
-  if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
-    return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
   
   UNIMPLEMENTED("%03o", bytes[0]);
 }

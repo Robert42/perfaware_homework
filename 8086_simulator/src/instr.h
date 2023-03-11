@@ -11,6 +11,7 @@ enum Instr_Op
   IN, // read from port
   OUT, // write to port
   XLAT,
+  TEST,
   
   LEA, // https://stackoverflow.com/a/1665570/2301866, basically mov is `x[i+offsetof(y)]` and lea is `&x[i+offsetof(y)]`
   LDS,

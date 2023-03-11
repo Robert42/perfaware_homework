@@ -37,6 +37,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case ROR:
   case RCL:
   case RCR:
+  case TEST:
     fprintf(file, "%s %s, %s\n", instr_op_str(instr.op), fmt_operand(instr.dest), fmt_operand(instr.src));
     return;
   case INC:
@@ -80,6 +81,7 @@ const char* instr_op_str(enum Instr_Op op)
   case OUT: return "out";
   
   case XLAT: return "xlat";
+  case TEST: return "test";
   
   case LEA: return "lea";
   case LES: return "les";
