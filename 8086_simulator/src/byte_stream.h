@@ -12,11 +12,16 @@ enum Log_Bytes
 }LOG_BYTES = LB_OCT;
 size_t BYTES_READ = 0;
 
-void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
+void peek_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
 {
   ASSERT(s->begin+n_bytes <= s->end, "unexpected end!");
 
   memcpy(dest, s->begin, n_bytes);
+}
+
+void read_bytes(void* dest, size_t n_bytes, struct Byte_Stream* s)
+{
+  peek_bytes(dest, n_bytes, s);
 
   if(LOG)
   {
@@ -41,6 +46,13 @@ uint16_t read_u16(struct Byte_Stream* s)
 {
   uint16_t x;
   read_bytes(&x, sizeof(x), s);
+  return x;
+}
+
+uint8_t peek_u8(struct Byte_Stream* s)
+{
+  uint8_t x;
+  peek_bytes(&x, sizeof(x), s);
   return x;
 }
 

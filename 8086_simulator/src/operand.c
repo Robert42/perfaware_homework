@@ -27,9 +27,27 @@ static const char* reg_to_str(enum Reg reg)
     CASE(SI);
     CASE(DI);
   }
-#undef CASE
-  abort();
+  UNREACHABLE();
 }
+
+enum Seg_Reg seg_reg_decode(uint8_t REG)
+{
+  ASSERT(REG < 4);
+  return REG;
+}
+
+const char* seg_reg_to_str(enum Seg_Reg reg)
+{
+  switch(reg)
+  {
+    CASE(ES);
+    CASE(CS);
+    CASE(SS);
+    CASE(DS);
+  }
+  UNREACHABLE();
+}
+#undef CASE
 
 static const char* addr_expr_to_str(enum Addr_Expr addr_expr)
 {
@@ -55,22 +73,53 @@ const char* fmt_operand(struct Operand op)
     START = 0;
 
   char* text = RING_BUFFER + START;
+
+  switch(op.expl_size)
+  {
+  case OP_EXPL_SIZE_U8:
+    text += sprintf(text, "byte ");
+    break;
+  case OP_EXPL_SIZE_U16:
+    text += sprintf(text, "word ");
+    break;
+  case OP_EXPL_SIZE_NONE:
+    break;
+  }
+
+  if(op.seg_override)
+    text += sprintf(text, "%s:", seg_reg_to_str(op.seg_override_reg));
   
   switch(op.variant)
   {
-  case OPERAND_REG:
-    return reg_to_str(op.reg);
+  case OPERAND_NONE: return "";
+  case OPERAND_REG: return reg_to_str(op.reg);
+  case OPERAND_SEG_REG: return seg_reg_to_str(op.reg);
   case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
   case OPERAND_ADDR_EXPR: sprintf(text, "[%s]", addr_expr_to_str(op.addr_expr)); goto done;
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
-  case OPERAND_IMMEDIATE_8: sprintf(text, "byte %" PRIu8, op.payload.lo); goto done;
-  case OPERAND_IMMEDIATE_16: sprintf(text, "word %" PRIu16, op.payload.wide); goto done;
-  case OPERAND_COUNT: abort();
+  case OPERAND_DATA_16: sprintf(text, "%" PRIu16, op.payload.wide); goto done;
+  case OPERAND_DATA_8: sprintf(text, "%" PRIu8, op.payload.lo); goto done;
+  case OPERAND_STR_MANIP:
+  {
+    const char* str_manip = NULL;
+    switch(op.str_manip.op)
+    {
+    case OSM_MOVS: str_manip = "movs"; break;
+    case OSM_CMPS: str_manip = "cmps"; break;
+    case OSM_SCAS: str_manip = "scas"; break;
+    case OSM_LODS: str_manip = "lods"; break;
+    case OSM_STOS: str_manip = "stos"; break;
+    }
+    sprintf(text, "%s%s", str_manip, op.str_manip.W ? "w" : "b");
+    goto done;
+  }
+  case OPERAND_COUNT: UNREACHABLE();
   }
 
-  abort();
+  UNREACHABLE();
 
 done:
+  text = RING_BUFFER + START;
   START += strlen(text)+1;
   ASSERT(START < ARRAY_LEN(RING_BUFFER));
   return text;
@@ -83,6 +132,14 @@ void op_swap(struct Operand* x, struct Operand* y)
   *y = tmp;
 }
 
+struct Operand op_seg_reg(uint8_t REG)
+{
+  return (struct Operand){
+    .variant = OPERAND_SEG_REG,
+    .reg = seg_reg_decode(REG),
+  };
+}
+
 struct Operand op_reg(bool W, uint8_t REG)
 {
   return (struct Operand){
@@ -93,9 +150,32 @@ struct Operand op_reg(bool W, uint8_t REG)
 
 struct Operand op_im(bool W, union Payload payload)
 {
+  struct Operand o = op_data(W, payload);
+  o.expl_size = W ? OP_EXPL_SIZE_U16 : OP_EXPL_SIZE_U8;
+  return o;
+}
+
+struct Operand op_data(bool W, union Payload payload)
+{
   return (struct Operand){
-    .variant = W ? OPERAND_IMMEDIATE_16 : OPERAND_IMMEDIATE_8,
+    .variant = W ? OPERAND_DATA_16 : OPERAND_DATA_8,
     .payload = payload,
+  };
+}
+
+struct Operand op_data8(uint8_t payload)
+{
+  return (struct Operand){
+    .variant = OPERAND_DATA_8,
+    .payload = {.lo = payload},
+  };
+}
+
+struct Operand op_data16(uint16_t payload)
+{
+  return (struct Operand){
+    .variant = OPERAND_DATA_16,
+    .payload.wide = payload,
   };
 }
 
@@ -122,4 +202,37 @@ struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t
     .addr_expr = addr_expr,
     .payload.wide = displacement,
   };
+}
+
+struct Operand op_str_manip_op(bool W, enum Operand_Str_Manip op)
+{
+  return (struct Operand){
+    .variant = OPERAND_STR_MANIP,
+    .str_manip = {
+      .op = op,
+      .W = W,
+    },
+  };
+}
+
+bool op_is_addr(enum Operand_Variant op)
+{
+  switch(op)
+  {
+  case OPERAND_NONE:
+  case OPERAND_REG:
+  case OPERAND_SEG_REG:
+  case OPERAND_DATA_8:
+  case OPERAND_DATA_16:
+  case OPERAND_STR_MANIP:
+    return false;
+  case OPERAND_ADDR_DIRECT:
+  case OPERAND_ADDR_EXPR:
+  case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT:
+    return true;
+
+  case OPERAND_COUNT:
+    break;
+  }
+  UNREACHABLE();
 }

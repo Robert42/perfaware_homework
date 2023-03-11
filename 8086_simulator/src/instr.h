@@ -1,15 +1,85 @@
-#define ARITH_OP 0x10
-#define JMP_OP 0x20
-#define LOOP_OP 0x30
+#define JMP_OP 0x40
+#define ARITH_OP 0x50
+#define LOOP_OP 0x58
 
 enum Instr_Op
 {
   MOV,
+  PUSH,
+  POP,
+  XCHG,
+  IN, // read from port
+  OUT, // write to port
+  XLAT,
+  TEST,
+  
+  LEA, // https://stackoverflow.com/a/1665570/2301866, basically mov is `x[i+offsetof(y)]` and lea is `&x[i+offsetof(y)]`
+  LDS,
+  LES,
 
+  LAHF,
+  SAHF,
+  PUSHF,
+  POPF,
+  
+  CBW,
+  CWD,
+
+  INC,
+  DEC,
+  NEG,
+  MUL,
+  IMUL,
+  DIV,
+  IDIV,
+  NOT,
+
+  SHL,
+  SHR,
+  SAR,
+  ROL,
+  ROR,
+  RCL,
+  RCR,
+  
+  // https://www.pcjs.org/documents/manuals/intel/8086/ops/AAA/
+  // https://en.wikipedia.org/wiki/Binary-coded_decimal
+  AAA,
+  DAA,
+  AAS,
+  DAS,
+  AAM,
+  AAD,
+
+  REP,
+
+  CALL,
+  JMP,
+  RET,
+  INT,
+  
+  INTO,
+  IRET,
+  
+  CLC,
+  CMC,
+  STC,
+  CLD,
+  STD,
+  CLI,
+  STI,
+  HLT,
+  WAIT,
+  
   // arith
   ADD = ARITH_OP | 0b000,
+  ADC = ARITH_OP | 0b010, // add with carry
   SUB = ARITH_OP | 0b101,
   CMP = ARITH_OP | 0b111,
+  SBB = ARITH_OP | 0b011,
+  AND = ARITH_OP | 0b100,
+  OR  = ARITH_OP | 0b001,
+  XOR = ARITH_OP | 0b110,
 
   // jump
   JZ  = JMP_OP | 0b0100,
@@ -37,7 +107,8 @@ enum Instr_Op
 
 struct Instr
 {
-  enum Instr_Op op;
+  enum Instr_Op op : 7;
+  bool lock : 1;
   union
   {
     struct{
