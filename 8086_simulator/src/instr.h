@@ -51,6 +51,8 @@ enum Instr_Op
   AAM,
   AAD,
 
+  REP,
+
   // arith
   ADD = ARITH_OP | 0b000,
   ADC = ARITH_OP | 0b010, // add with carry

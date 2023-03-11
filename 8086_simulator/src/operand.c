@@ -94,6 +94,20 @@ const char* fmt_operand(struct Operand op)
   case OPERAND_ADDR_EXPR_WITH_DISPLACEMENT: sprintf(text, "[%s + %i]", addr_expr_to_str(op.addr_expr), (int)(int16_t)op.payload.wide); goto done;
   case OPERAND_DATA_16: sprintf(text, "%" PRIu16, op.payload.wide); goto done;
   case OPERAND_DATA_8: sprintf(text, "%" PRIu8, op.payload.lo); goto done;
+  case OPERAND_STR_MANIP:
+  {
+    const char* str_manip = NULL;
+    switch(op.str_manip.op)
+    {
+    case OSM_MOVS: str_manip = "movs"; break;
+    case OSM_CMPS: str_manip = "cmps"; break;
+    case OSM_SCAS: str_manip = "scas"; break;
+    case OSM_LODS: str_manip = "lods"; break;
+    case OSM_STOS: str_manip = "stos"; break;
+    }
+    sprintf(text, "%s%s", str_manip, op.str_manip.W ? "w" : "b");
+    goto done;
+  }
   case OPERAND_COUNT: UNREACHABLE();
   }
 
@@ -185,6 +199,17 @@ struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t
   };
 }
 
+struct Operand op_str_manip_op(bool W, enum Operand_Str_Manip op)
+{
+  return (struct Operand){
+    .variant = OPERAND_STR_MANIP,
+    .str_manip = {
+      .op = op,
+      .W = W,
+    },
+  };
+}
+
 bool op_is_addr(enum Operand_Variant op)
 {
   switch(op)
@@ -193,6 +218,7 @@ bool op_is_addr(enum Operand_Variant op)
   case OPERAND_SEG_REG:
   case OPERAND_DATA_8:
   case OPERAND_DATA_16:
+  case OPERAND_STR_MANIP:
     return false;
   case OPERAND_ADDR_DIRECT:
   case OPERAND_ADDR_EXPR:

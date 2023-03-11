@@ -31,6 +31,15 @@ union Payload
   uint16_t wide;
 };
 
+enum Operand_Str_Manip
+{
+  OSM_MOVS,
+  OSM_CMPS,
+  OSM_SCAS,
+  OSM_LODS,
+  OSM_STOS,
+};
+
 enum Operand_Variant
 {
   OPERAND_REG,
@@ -40,6 +49,7 @@ enum Operand_Variant
   OPERAND_ADDR_EXPR_WITH_DISPLACEMENT,
   OPERAND_DATA_8,
   OPERAND_DATA_16,
+  OPERAND_STR_MANIP,
   
   OPERAND_COUNT,
 };
@@ -59,6 +69,11 @@ struct Operand
   {
     enum Reg reg;
     enum Addr_Expr addr_expr;
+    struct
+    {
+      enum Operand_Str_Manip op : 3;
+      bool W : 1;
+    } str_manip;
   };
   union Payload payload;
 };
@@ -74,5 +89,6 @@ struct Operand op_data16(uint16_t payload);
 struct Operand op_addr_direct(uint16_t addr);
 struct Operand op_addr_expr(enum Addr_Expr addr_expr);
 struct Operand op_addr_expr_with_displacement(enum Addr_Expr addr_expr, uint16_t displacement);
+struct Operand op_str_manip_op(bool wide, enum Operand_Str_Manip op);
 
 bool op_is_addr(enum Operand_Variant op);

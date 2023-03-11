@@ -22,6 +22,9 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     // printing word directly feels like cheating
     fprintf(file, "%s word %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
+  case REP:
+    fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
+    return;
   case MOV:
   case XCHG:
   case IN:
@@ -106,6 +109,8 @@ const char* instr_op_str(enum Instr_Op op)
   case DAS: return "das";
   case AAM: return "aam";
   case AAD: return "aad";
+  
+  case REP: return "rep";
 
   case ADD: return "add";
   case ADC: return "adc";

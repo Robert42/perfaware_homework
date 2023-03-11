@@ -112,6 +112,25 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     const bool W = bytes[0] & 1;
     return (struct Instr){.op=TEST, .dest=op_reg(W, AL), .src=op_data(W, read_payload(W, byte_stream))};
   }
+  case 0362: // REP
+  {
+    const bool Z = bytes[0] & 1;
+    bytes[1] = read_u8(byte_stream);
+    const bool W = bytes[1] & 1;
+
+    enum Operand_Str_Manip str_manip;
+    switch(bytes[1] & 0xfe)
+    {
+    case 0244: str_manip = OSM_MOVS; break;
+    case 0246: str_manip = OSM_CMPS; break;
+    case 0256: str_manip = OSM_SCAS; break;
+    case 0254: str_manip = OSM_LODS; break;
+    case 0252: str_manip = OSM_STOS; break;
+    default:
+      UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
+    }
+    return (struct Instr){.op=REP, .src=op_str_manip_op(W, str_manip), };
+  }
   case 0376:
   {
     bytes[1] = peek_u8(byte_stream); // warning, peek, not read
