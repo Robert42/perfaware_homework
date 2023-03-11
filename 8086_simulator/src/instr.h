@@ -20,6 +20,9 @@ enum Instr_Op
   SAHF,
   PUSHF,
   POPF,
+  
+  CBW,
+  CWD,
 
   INC,
   DEC,

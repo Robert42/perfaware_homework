@@ -46,6 +46,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0047: return (struct Instr){.op = DAA};
   case 0077: return (struct Instr){.op = AAS};
   case 0057: return (struct Instr){.op = DAS};
+  case 0230: return (struct Instr){.op = CBW};
+  case 0231: return (struct Instr){.op = CWD};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);
