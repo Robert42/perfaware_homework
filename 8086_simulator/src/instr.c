@@ -3,6 +3,10 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   switch(instr.op)
   {
   case XLAT:
+  case LAHF:
+  case SAHF:
+  case PUSHF:
+  case POPF:
     fprintf(file, "%s\n", instr_op_str(instr.op));
     return;
   case PUSH:
@@ -57,6 +61,11 @@ const char* instr_op_str(enum Instr_Op op)
   case LEA: return "lea";
   case LES: return "les";
   case LDS: return "lds";
+
+  case LAHF: return "lahf";
+  case SAHF: return "sahf";
+  case PUSHF: return "pushf";
+  case POPF: return "popf";
 
   case ADD: return "add";
   case SUB: return "sub";

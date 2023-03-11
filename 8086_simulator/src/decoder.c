@@ -30,8 +30,11 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     if((bytes[1]&0070) == 0) // POP -- register/memory
       return decode_rm(POP, bytes, byte_stream);
     break;
-  case 0327:
-    return (struct Instr){.op = XLAT};
+  case 0327: return (struct Instr){.op = XLAT};
+  case 0237: return (struct Instr){.op = LAHF};
+  case 0236: return (struct Instr){.op = SAHF};
+  case 0234: return (struct Instr){.op = PUSHF};
+  case 0235: return (struct Instr){.op = POPF};
   case 0215:
   case 0305:
   case 0304:
