@@ -8,7 +8,9 @@ static const char* reg_to_str(enum Reg reg);
 
 enum Seg_Reg
 {
+  ES = 0,
   CS = 1,
+  SS = 2,
   DS = 3,
 };
 static enum Seg_Reg seg_reg_decode(uint8_t REG);
@@ -64,8 +66,10 @@ enum Operand_Expl_Size
 
 struct Operand
 {
-  enum Operand_Variant variant : 6;
+  enum Operand_Variant variant : 4;
   enum Operand_Expl_Size expl_size : 2;
+  enum Seg_Reg seg_override_reg : 2;
+  bool seg_override : 1;
   union
   {
     enum Reg reg;

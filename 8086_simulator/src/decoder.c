@@ -18,7 +18,9 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream);
 struct Decode_Context
 {
   bool lock_prefix : 1;
-  bool segment_override : 1;
+
+  bool seg_override : 1;
+  enum Seg_Reg seg_override_reg : 2;
 };
 
 // In a real application, I would make this thread local
@@ -29,10 +31,26 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream, bool* was_prefix)
 {
   struct Instr instr = _instr_decode(byte_stream);
 
-  if(was_prefix)
-    *was_prefix = NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.segment_override;
-
   instr.lock = CURR_DECODE_CONTEXT.lock_prefix;
+
+  if(CURR_DECODE_CONTEXT.seg_override)
+  {
+    if(op_is_addr(instr.src.variant))
+    {
+      instr.src.seg_override = true;
+      instr.src.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
+    }
+    /* untested
+    if(op_is_addr(instr.dest.variant))
+    {
+      instr.dest.seg_override = true;
+      instr.dest.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
+    }
+    */
+  }
+
+  if(was_prefix)
+    *was_prefix = NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.seg_override;
 
   CURR_DECODE_CONTEXT = NEXT_DECODE_CONTEXT;
   NEXT_DECODE_CONTEXT = (struct Decode_Context){};
@@ -141,8 +159,9 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
     UNIMPLEMENTED();
   case 214: // MOV -- Segment register to register/memory
     UNIMPLEMENTED();
-  case 056: // fmt_operand
-    NEXT_DECODE_CONTEXT = (struct Decode_Context){.segment_override=true,}; return (struct Instr){};
+  case 056: // CS:* segment override prefix
+    NEXT_DECODE_CONTEXT = (struct Decode_Context){.seg_override=true, .seg_override_reg=CS};
+    return (struct Instr){};
   }
   
   // ==== 1111 1110 ============================================================

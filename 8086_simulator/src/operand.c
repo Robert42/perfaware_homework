@@ -33,7 +33,6 @@ static const char* reg_to_str(enum Reg reg)
 enum Seg_Reg seg_reg_decode(uint8_t REG)
 {
   ASSERT(REG < 4);
-  ASSERT(REG == 1 || REG == 3, "%" PRIu8, REG);
   return REG;
 }
 
@@ -41,7 +40,9 @@ const char* seg_reg_to_str(enum Seg_Reg reg)
 {
   switch(reg)
   {
+    CASE(ES);
     CASE(CS);
+    CASE(SS);
     CASE(DS);
   }
   UNREACHABLE();
@@ -72,6 +73,9 @@ const char* fmt_operand(struct Operand op)
     START = 0;
 
   char* text = RING_BUFFER + START;
+
+  if(op.seg_override)
+    text += sprintf(text, "%s:", seg_reg_to_str(op.seg_override_reg));
 
   switch(op.expl_size)
   {
