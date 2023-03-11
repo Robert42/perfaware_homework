@@ -65,6 +65,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return (struct Instr){.op=loop_op(bytes[0]), .ip_incr=bytes[1]};
   }
 
+  switch(bytes[0] & 0xf8)
+  {
+  case 0220: // XCHG -- Register with accumulator
+    return (struct Instr){.op=XCHG, .dest=op_reg(true, AL), .src=op_reg(true, bytes[0]&7)};
+  }
+
   switch(bytes[0] & 0xf0)
   {
   case 0260: // MOV -- Immediate to register
