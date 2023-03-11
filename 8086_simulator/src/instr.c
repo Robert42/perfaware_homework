@@ -2,6 +2,10 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
 {
   switch(instr.op)
   {
+  case PUSH:
+    // printing word directly feels like cheating
+    fprintf(file, "%s word %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
+    return;
   case MOV:
   case ADD:
   case SUB:
@@ -21,7 +25,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     return;
   }
 
-  UNREACHABLE();
+  UNREACHABLE("instr.op: 0x%02" PRIx8 "\n", instr.op);
 }
 
 const char* instr_op_str(enum Instr_Op op)
@@ -29,6 +33,8 @@ const char* instr_op_str(enum Instr_Op op)
   switch(op)
   {
   case MOV: return "mov";
+  
+  case PUSH: return "push";
 
   case ADD: return "add";
   case SUB: return "sub";
