@@ -55,6 +55,7 @@ enum Instr_Op
 
   CALL,
   JMP,
+  RET,
 
   // arith
   ADD = ARITH_OP | 0b000,

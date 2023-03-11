@@ -25,6 +25,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case REP:
   case CALL:
   case JMP:
+  case RET:
     fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
   case MOV:
@@ -115,6 +116,7 @@ const char* instr_op_str(enum Instr_Op op)
   case REP: return "rep";
   case CALL: return "call";
   case JMP: return "jmp";
+  case RET: return "ret";
 
   case ADD: return "add";
   case ADC: return "adc";

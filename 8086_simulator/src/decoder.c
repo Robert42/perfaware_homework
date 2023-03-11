@@ -92,6 +92,14 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     }
     return decode_instr_rm2rm_dw(op, true, true, bytes, byte_stream);
   }
+  case 0302: // RET -- Within seg adding to SP
+  {
+      return (struct Instr){.op = RET, .src = op_data16(read_u16(byte_stream))};
+  }
+  case 0303: // RET -- Within seg adding to SP
+  {
+      return (struct Instr){.op = RET};
+  }
   }
   
   // ==== 1111 1110 ============================================================

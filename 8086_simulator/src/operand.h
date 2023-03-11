@@ -42,6 +42,7 @@ enum Operand_Str_Manip
 
 enum Operand_Variant
 {
+  OPERAND_NONE,
   OPERAND_REG,
   OPERAND_SEG_REG,
   OPERAND_ADDR_DIRECT,

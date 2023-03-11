@@ -87,6 +87,7 @@ const char* fmt_operand(struct Operand op)
   
   switch(op.variant)
   {
+  case OPERAND_NONE: return "";
   case OPERAND_REG: return reg_to_str(op.reg);
   case OPERAND_SEG_REG: return seg_reg_to_str(op.reg);
   case OPERAND_ADDR_DIRECT: sprintf(text, "[%" PRIu16 "]", op.payload.wide); goto done;
@@ -214,6 +215,7 @@ bool op_is_addr(enum Operand_Variant op)
 {
   switch(op)
   {
+  case OPERAND_NONE:
   case OPERAND_REG:
   case OPERAND_SEG_REG:
   case OPERAND_DATA_8:
