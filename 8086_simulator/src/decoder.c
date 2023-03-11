@@ -148,6 +148,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     case 0020: // CALL -- indirect with segment
       bytes[1] = read_u8(byte_stream);
       return decode_rm(CALL, bytes, byte_stream);
+    case 0040: // JMP -- indirect with segment
+      bytes[1] = read_u8(byte_stream);
+      return decode_rm(JMP, bytes, byte_stream);
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }
