@@ -22,7 +22,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   if((bytes[0] & 0b11000100) == 0) // Arithmetic --   Reg/memory and register to either
     return decode_instr_rm2rm(arith_op(bytes[0], 3), bytes, byte_stream);
   
-  // ==== 1111 1111 ====
+  // ==== 1111 1111 ============================================================
   switch(bytes[0])
   {
   case 0xff:
@@ -94,7 +94,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
   }
   
-  // ==== 1111 1110 ====
+  // ==== 1111 1110 ============================================================
   switch(bytes[0] & 0xfe)
   {
   case 0306: // MOV -- Immediate to register/memory
@@ -165,7 +165,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   }
   }
 
-  // ==== 1111 1100 ====
+  // ==== 1111 1100 ============================================================
   switch(bytes[0] & 0xfc)
   {
   // Arithmetic -- Immediate to register/memory
@@ -254,7 +254,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return decode_instr_rm2rm(TEST, bytes, byte_stream);
   }
 
-  // ==== 1111 1000 ====
+  // ==== 1111 1000 ============================================================
   switch(bytes[0] & 0xf8)
   {
   case 0220: // XCHG -- Register with accumulator
@@ -265,7 +265,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return (struct Instr){.op=DEC, .src=op_reg(true, bytes[0]&7)};
   }
 
-  // ==== 1111 0000 ====
+  // ==== 1111 0000 ============================================================
   switch(bytes[0] & 0xf0)
   {
   case 0260: // MOV -- Immediate to register
