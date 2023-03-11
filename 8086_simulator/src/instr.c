@@ -8,6 +8,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     fprintf(file, "%s word %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
   case MOV:
+  case XCHG:
   case ADD:
   case SUB:
   case CMP:
@@ -37,6 +38,8 @@ const char* instr_op_str(enum Instr_Op op)
   
   case PUSH: return "push";
   case POP: return "pop";
+  
+  case XCHG: return "xchg";
 
   case ADD: return "add";
   case SUB: return "sub";

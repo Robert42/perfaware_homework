@@ -2,6 +2,7 @@
 
 struct Operand decode_addr_expr(bool W, uint8_t mode, uint8_t r_m, struct Byte_Stream* byte_stream);
 struct Instr decode_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
+struct Instr decode_instr_rm2rm_dw(enum Instr_Op op, bool d, bool w, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2rm(enum Instr_Op op, bool wide_im, uint8_t* bytes, struct Byte_Stream* byte_stream);
 struct Instr decode_instr_im2r(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream);
@@ -21,35 +22,42 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
   case 0xff:
     bytes[1] = read_u8(byte_stream);
-    if((bytes[1]&0070) == 0060) // PUSH register/memory
+    if((bytes[1]&0070) == 0060) // PUSH -- register/memory
       return decode_rm(PUSH, bytes, byte_stream);
     break;
   case 0x8f:
     bytes[1] = read_u8(byte_stream);
-    if((bytes[1]&0070) == 0) // PUSH register/memory
+    if((bytes[1]&0070) == 0) // POP -- register/memory
       return decode_rm(POP, bytes, byte_stream);
     break;
   }
   
   switch(bytes[0] & 0xfe)
   {
-  case 0306: // Immediate to register/memory
+  case 0306: // MOV -- Immediate to register/memory
+  {
     const bool W = bytes[0] & 1;
     bytes[1] = read_u8(byte_stream);
     return decode_instr_im2rm(MOV, W, bytes, byte_stream);
   }
+  case 0206: // XCHG -- Register/memory to/from register
+  {
+    const bool W = bytes[0] & 1;
+    return decode_instr_rm2rm_dw(XCHG, true, W, bytes, byte_stream);
+  }
+  }
 
   switch(bytes[0] & 0xfc)
   {
-  // Immediate to register/memory
+  // Arithmetic -- Immediate to register/memory
   case 0200:
     const bool wide_im = (bytes[0] & 3) == 1;
     bytes[1] = read_u8(byte_stream);
     return decode_instr_im2rm(arith_op(bytes[1], 3), wide_im, bytes, byte_stream);
 
-  case 0210: // Register/memory to/from register
+  case 0210: // MOV -- Register/memory to/from register
     return decode_instr_rm2rm(MOV, bytes, byte_stream);
-  case 0240: // Memory to/from accumulator
+  case 0240: // MOV -- Memory to/from accumulator
     return decode_instr_mem_acc(MOV, bytes, byte_stream);
   
   case 0340: // Loop
@@ -59,7 +67,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
 
   switch(bytes[0] & 0xf0)
   {
-  case 0260: // Immediate to register
+  case 0260: // MOV -- Immediate to register
     return decode_instr_im2r(MOV, bytes, byte_stream);
   case 0x70:
     bytes[1] = read_u8(byte_stream);
@@ -75,7 +83,7 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return (struct Instr){.op=pop ? POP : PUSH, .src=op_seg_reg(3 & (bytes[0]>>3))};
   }
 
-  // Immediate to accumulator
+  // Arithmetic -- Immediate to accumulator
   if((bytes[0] & 0b11000100) == 0b100)
   {
     struct Instr instr = {.op=arith_op(bytes[0], 3)};
@@ -129,10 +137,15 @@ struct Instr decode_rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byt
 
 struct Instr decode_instr_rm2rm(enum Instr_Op op, uint8_t* bytes, struct Byte_Stream* byte_stream)
 {
-    struct Instr instr = {.op=op};
-
     const bool D = bytes[0] & 2;
     const bool W = bytes[0] & 1;
+
+    return decode_instr_rm2rm_dw(op, D, W, bytes, byte_stream);
+}
+
+struct Instr decode_instr_rm2rm_dw(enum Instr_Op op, bool D, bool W, uint8_t* bytes, struct Byte_Stream* byte_stream)
+{
+    struct Instr instr = {.op=op};
 
     bytes[1] = read_u8(byte_stream);
     const uint8_t mod = (bytes[1] & 0300) >> 6;
