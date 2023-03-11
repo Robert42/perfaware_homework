@@ -6,6 +6,7 @@ enum Instr_Op
 {
   MOV,
   PUSH,
+  POP,
 
   // arith
   ADD = ARITH_OP | 0b000,

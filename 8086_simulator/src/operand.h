@@ -9,6 +9,7 @@ static const char* reg_to_str(enum Reg reg);
 enum Seg_Reg
 {
   CS = 1,
+  DS = 3,
 };
 static enum Seg_Reg seg_reg_decode(uint8_t REG);
 static const char* seg_reg_to_str(enum Seg_Reg reg);

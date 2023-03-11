@@ -23,6 +23,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     bytes[1] = read_u8(byte_stream);
     if((bytes[1]&0070) == 0060) // PUSH register/memory
       return decode_rm(PUSH, bytes, byte_stream);
+    break;
+  case 0x8f:
+    bytes[1] = read_u8(byte_stream);
+    if((bytes[1]&0070) == 0) // PUSH register/memory
+      return decode_rm(POP, bytes, byte_stream);
+    break;
   }
   
   switch(bytes[0] & 0xfe)
@@ -51,12 +57,6 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     return (struct Instr){.op=loop_op(bytes[0]), .ip_incr=bytes[1]};
   }
 
-  switch(bytes[0] & 0xf8)
-  {
-  case 0120: // PUSH - register
-    return (struct Instr){.op=PUSH, .src=op_reg(true, bytes[0]&7)};
-  }
-  
   switch(bytes[0] & 0xf0)
   {
   case 0260: // Immediate to register
@@ -64,10 +64,16 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0x70:
     bytes[1] = read_u8(byte_stream);
     return (struct Instr){.op=jmp_op(bytes[0]), .ip_incr=bytes[1]};
+  case 0120: // PUSH/POP - register
+    const bool pop = bytes[0] & 8;
+    return (struct Instr){.op=pop ? POP : PUSH, .src=op_reg(true, bytes[0]&7)};
   }
 
-  if((bytes[0] & 0b11100111) == 0b110) // PUSH -- segment register
-    return (struct Instr){.op=PUSH, .src=op_seg_reg(3 & (bytes[0]>>3))};
+  if((bytes[0] & 0b11100110) == 0b110) // PUSH -- segment register
+  {
+    const bool pop = bytes[0] & 1;
+    return (struct Instr){.op=pop ? POP : PUSH, .src=op_seg_reg(3 & (bytes[0]>>3))};
+  }
 
   // Immediate to accumulator
   if((bytes[0] & 0b11000100) == 0b100)

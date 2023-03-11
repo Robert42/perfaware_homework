@@ -3,6 +3,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   switch(instr.op)
   {
   case PUSH:
+  case POP:
     // printing word directly feels like cheating
     fprintf(file, "%s word %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
@@ -35,6 +36,7 @@ const char* instr_op_str(enum Instr_Op op)
   case MOV: return "mov";
   
   case PUSH: return "push";
+  case POP: return "pop";
 
   case ADD: return "add";
   case SUB: return "sub";

@@ -33,7 +33,7 @@ static const char* reg_to_str(enum Reg reg)
 enum Seg_Reg seg_reg_decode(uint8_t REG)
 {
   ASSERT(REG < 4);
-  ASSERT(REG == 1);
+  ASSERT(REG == 1 || REG == 3, "%" PRIu8, REG);
   return REG;
 }
 
@@ -42,6 +42,7 @@ const char* seg_reg_to_str(enum Seg_Reg reg)
   switch(reg)
   {
     CASE(CS);
+    CASE(DS);
   }
   UNREACHABLE();
 }
