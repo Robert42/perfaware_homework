@@ -33,7 +33,19 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0327:
     return (struct Instr){.op = XLAT};
   case 0215:
-    return decode_instr_rm2rm_dw(LEA, true, true, bytes, byte_stream);
+  case 0305:
+  case 0304:
+  {
+    enum Instr_Op op;
+    switch(bytes[0])
+    {
+    case 0215: op = LEA; break;
+    case 0305: op = LDS; break;
+    case 0304: op = LES; break;
+    default: UNREACHABLE();
+    }
+    return decode_instr_rm2rm_dw(op, true, true, bytes, byte_stream);
+  }
   }
   
   switch(bytes[0] & 0xfe)
