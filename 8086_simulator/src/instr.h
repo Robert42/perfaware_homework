@@ -29,6 +29,8 @@ enum Instr_Op
   // https://en.wikipedia.org/wiki/Binary-coded_decimal
   AAA,
   DAA,
+  AAS,
+  DAS,
 
   // arith
   ADD = ARITH_OP | 0b000,

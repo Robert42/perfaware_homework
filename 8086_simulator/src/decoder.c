@@ -44,6 +44,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0235: return (struct Instr){.op = POPF};
   case 0067: return (struct Instr){.op = AAA};
   case 0047: return (struct Instr){.op = DAA};
+  case 0077: return (struct Instr){.op = AAS};
+  case 0057: return (struct Instr){.op = DAS};
   case 0215:
   case 0305:
   case 0304:
