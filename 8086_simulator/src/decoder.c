@@ -112,6 +112,12 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   {
       return (struct Instr){.op = INT, .src=op_data8(read_u8(byte_stream))};
   }
+  case 216: // MOV -- Register/memory to segment register
+    UNIMPLEMENTED();
+  case 214: // MOV -- Segment register to register/memory
+    UNIMPLEMENTED();
+  case 056: // fmt_operand
+    return (struct Instr){.op = SEGMENT_OVERRIDE_PREFIX, .src=op_seg_reg(CS)};
   }
   
   // ==== 1111 1110 ============================================================

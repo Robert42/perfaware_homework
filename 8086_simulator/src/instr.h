@@ -72,6 +72,7 @@ enum Instr_Op
   WAIT,
   
   LOCK,
+  SEGMENT_OVERRIDE_PREFIX,
 
   // arith
   ADD = ARITH_OP | 0b000,

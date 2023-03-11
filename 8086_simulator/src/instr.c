@@ -2,6 +2,9 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
 {
   switch(instr.op)
   {
+  case SEGMENT_OVERRIDE_PREFIX:
+    fprintf(file, "%s:\n", fmt_operand(instr.src));
+    return;
   case XLAT:
   case LAHF:
   case SAHF:
@@ -188,6 +191,7 @@ const char* instr_op_str(enum Instr_Op op)
   case JCXZ: return "jcxz";
   
   case LOCK: return "lock";
+  case SEGMENT_OVERRIDE_PREFIX: UNREACHABLE();
   }
 
   UNREACHABLE();
