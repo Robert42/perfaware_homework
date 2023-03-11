@@ -115,6 +115,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0362: // REP
   {
     const bool Z = bytes[0] & 1;
+    (void)Z;
+
     bytes[1] = read_u8(byte_stream);
     const bool W = bytes[1] & 1;
 
@@ -143,6 +145,9 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     case 0000: // INC -- Register/memory
       op = INC;
       break;
+    case 0020: // CALL -- indirect with segment
+      bytes[1] = read_u8(byte_stream);
+      return decode_rm(CALL, bytes, byte_stream);
     default:
       UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }
