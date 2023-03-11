@@ -114,6 +114,7 @@ const char* instr_op_str(enum Instr_Op op)
   case IMUL: return "imul";
   case DIV: return "div";
   case IDIV: return "idiv";
+  case AND: return "and";
 
   case SHL: return "shl";
   case SHR: return "shr";

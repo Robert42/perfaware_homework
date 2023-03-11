@@ -56,6 +56,7 @@ enum Instr_Op
   SUB = ARITH_OP | 0b101,
   CMP = ARITH_OP | 0b111,
   SBB = ARITH_OP | 0b011,
+  AND = ARITH_OP | 0b100,
 
   // jump
   JZ  = JMP_OP | 0b0100,
