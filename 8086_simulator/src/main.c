@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   ASSERT(argc == 2, "usage: %s [FILE]\n", program);
   const char* const filepath = argv[1];
 
-  LOG = strstr(filepath, "0041");
+  LOG = strstr(filepath, "0042");
   if(LOG)
     fprintf(stderr, "==== %s ====\n", filepath);
 
