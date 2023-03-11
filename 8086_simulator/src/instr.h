@@ -23,6 +23,7 @@ enum Instr_Op
 
   // arith
   ADD = ARITH_OP | 0b000,
+  ADC = ARITH_OP | 0b010, // add with carry
   SUB = ARITH_OP | 0b101,
   CMP = ARITH_OP | 0b111,
 
