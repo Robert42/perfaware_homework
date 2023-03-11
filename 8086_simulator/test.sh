@@ -35,6 +35,9 @@ nasm listing_0040_challenge_movs.asm
 ./sim8086 ../listing_0041_add_sub_cmp_jnz  >  listing_0041_add_sub_cmp_jnz.asm
 nasm listing_0041_add_sub_cmp_jnz.asm
 
+./sim8086 ../listing_0042_completionist_decode  >  listing_0042_completionist_decode.asm
+nasm listing_0042_completionist_decode.asm
+
 cp ../binary.sha256 .
 sha256sum -c --ignore-missing binary.sha256
 
