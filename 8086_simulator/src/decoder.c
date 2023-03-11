@@ -90,12 +90,19 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
   case 0366:
   {
     bytes[1] = peek_u8(byte_stream); // warning, peek, not read
+    enum Instr_Op op = 0;
     switch(bytes[1]&0070)
     {
     case 0030: // NEG -- Register/memory
-      return decode_instr_unary_rm(NEG, bytes, byte_stream);
+      op = NEG;
+      break;
+    case 0040: // MUL -- multiply unsigned
+      op = MUL;
+      break;
+    default:
+      UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
     }
-    UNIMPLEMENTED("%03o %03o", bytes[0], bytes[1]);
+    return decode_instr_unary_rm(op, bytes, byte_stream);
     break;
   }
   }

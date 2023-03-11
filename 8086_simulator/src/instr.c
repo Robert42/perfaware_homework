@@ -22,11 +22,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case XCHG:
   case IN:
   case OUT:
-  case ADD:
-  case ADC:
-  case SUB:
-  case SBB:
-  case CMP:
+  case ARITH_OP ... ARITH_OP|0b111:
   case LEA:
   case LES:
   case LDS:
@@ -35,6 +31,7 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
   case INC:
   case DEC:
   case NEG:
+  case MUL:
     fprintf(file, "%s %s\n", instr_op_str(instr.op), fmt_operand(instr.src));
     return;
   case JMP_OP ... JMP_OP | 0b1111:
@@ -92,6 +89,7 @@ const char* instr_op_str(enum Instr_Op op)
   case SUB: return "sub";
   case SBB: return "sbb";
   case CMP: return "cmp";
+  case MUL: return "mul";
 
   case JZ: return "jz";
   case JL: return "jl";
