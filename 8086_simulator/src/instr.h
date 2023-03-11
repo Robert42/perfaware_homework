@@ -10,6 +10,7 @@ enum Instr_Op
   XCHG,
   IN, // read from port
   OUT, // write to port
+  XLAT,
 
   // arith
   ADD = ARITH_OP | 0b000,

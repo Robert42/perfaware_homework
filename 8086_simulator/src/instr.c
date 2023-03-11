@@ -2,6 +2,9 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
 {
   switch(instr.op)
   {
+  case XLAT:
+    fprintf(file, "%s\n", instr_op_str(instr.op));
+    return;
   case PUSH:
   case POP:
     // printing word directly feels like cheating
@@ -45,6 +48,8 @@ const char* instr_op_str(enum Instr_Op op)
   
   case IN: return "in";
   case OUT: return "out";
+  
+  case XLAT: return "xlat";
 
   case ADD: return "add";
   case SUB: return "sub";

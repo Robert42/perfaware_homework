@@ -30,6 +30,8 @@ struct Instr instr_decode(struct Byte_Stream* byte_stream)
     if((bytes[1]&0070) == 0) // POP -- register/memory
       return decode_rm(POP, bytes, byte_stream);
     break;
+  case 0327:
+    return (struct Instr){.op = XLAT};
   }
   
   switch(bytes[0] & 0xfe)
