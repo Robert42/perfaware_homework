@@ -12,7 +12,7 @@ enum Instr_Op
   OUT, // write to port
   XLAT,
   
-  LEA, // https://stackoverflow.com/a/1665570/2301866
+  LEA, // https://stackoverflow.com/a/1665570/2301866, basically mov is `x[i+offsetof(y)]` and lea is `&x[i+offsetof(y)]`
 
   // arith
   ADD = ARITH_OP | 0b000,
