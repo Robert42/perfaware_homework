@@ -1,4 +1,4 @@
-void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos)
+void instr_print(struct Instr instr, FILE* file)
 {
   if(instr.lock)
     fprintf(file, "lock ");
@@ -73,13 +73,6 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     return;
   case JMP_OP ... JMP_OP | 0b1111:
   case LOOP_OP ... LOOP_OP | 0b0011:
-#if 1
-    if(labels)
-    {
-      ASSERT(labels[curr_pos+instr.ip_incr] > 0);
-      fprintf(file, "%s label%" PRIu16 "\n", instr_op_str(instr.op), labels[curr_pos+instr.ip_incr]-1);
-    }else
-#endif
     // labels aren't necessary, you can pass ip_incr directly!
     // BUT: the binary x86 has the ip_icnr starting at the _end_ of the instr,
     // but the text x86 interprets it from the _begin_ of the instr (internally,
@@ -206,16 +199,4 @@ const char* instr_op_str(enum Instr_Op op)
   }
 
   UNREACHABLE();
-}
-
-bool has_label(enum Instr_Op op)
-{
-  switch(op)
-  {
-  case JMP_OP ... JMP_OP | 0b1111:
-  case LOOP_OP ... LOOP_OP | 0b0011:
-    return true;
-  default:
-    return false;
-  }
 }
