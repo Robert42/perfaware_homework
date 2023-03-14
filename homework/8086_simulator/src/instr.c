@@ -1,4 +1,4 @@
-void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos)
+void instr_print(struct Instr instr, FILE* file)
 {
   if(instr.lock)
     fprintf(file, "lock ");
@@ -73,13 +73,21 @@ void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t 
     return;
   case JMP_OP ... JMP_OP | 0b1111:
   case LOOP_OP ... LOOP_OP | 0b0011:
-    if(labels)
+    // labels aren't necessary, you can pass ip_incr directly!
+    // BUT: the binary x86 has the ip_icnr starting at the _end_ of the instr,
+    // but the text x86 interprets it from the _begin_ of the instr (internally,
+    // nasm adds the length of the instr to the ip_incr when emitting the binary).
+    // ALSO: For some reason `$0` is not accepted as ip_incr, but martins had the
+    // idea¹ to simply encode `$+0` instead. That's why format with sign `%+i`
+    // instead of onyl negative sign `%i`
+    //
+    // ¹) https://www.computerenhance.com/p/opcode-patterns-in-8086-arithmetic/comment/13497019
     {
-      ASSERT(labels[curr_pos+instr.ip_incr] > 0);
-      fprintf(file, "%s label%" PRIu16 "\n", instr_op_str(instr.op), labels[curr_pos+instr.ip_incr]-1);
-    }else
-    {
-      fprintf(file, "%s %" PRIi8 "\n", instr_op_str(instr.op), instr.ip_incr);
+      const char* op = instr_op_str(instr.op);
+      const int ip_incr = (int)instr.ip_incr + (int)instr.size_in_bytes;
+
+      // Always printing the sign, even if it's positive, because nasm for some reason does not accept `$0` as jmp target: https://www.computerenhance.com/p/opcode-patterns-in-8086-arithmetic/comment/13497019
+      fprintf(file, "%s $+%i\n", op, ip_incr);
     }
     return;
   }
@@ -191,16 +199,4 @@ const char* instr_op_str(enum Instr_Op op)
   }
 
   UNREACHABLE();
-}
-
-bool has_label(enum Instr_Op op)
-{
-  switch(op)
-  {
-  case JMP_OP ... JMP_OP | 0b1111:
-  case LOOP_OP ... LOOP_OP | 0b0011:
-    return true;
-  default:
-    return false;
-  }
 }

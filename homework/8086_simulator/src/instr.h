@@ -109,6 +109,7 @@ struct Instr
 {
   enum Instr_Op op : 7;
   bool lock : 1;
+  uint8_t size_in_bytes : 3;
   union
   {
     struct{
@@ -118,6 +119,5 @@ struct Instr
     int8_t ip_incr;
   };
 };
-void instr_print(struct Instr instr, FILE* file, const uint16_t* labels, size_t curr_pos);
+void instr_print(struct Instr instr, FILE* file);
 const char* instr_op_str(enum Instr_Op op);
-bool has_label(enum Instr_Op op);

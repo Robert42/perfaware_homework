@@ -13,57 +13,58 @@ enum Instr_Op arith_op(uint8_t encoded, uint8_t rshift){return (7 & (encoded >> 
 enum Instr_Op jmp_op(uint8_t encoded){return (encoded & 0x0f) | JMP_OP;}
 enum Instr_Op loop_op(uint8_t encoded){return (encoded & 0x03) | LOOP_OP;}
 
-struct Instr _instr_decode(struct Byte_Stream* byte_stream);
-
-struct Decode_Context
+struct Decoder
 {
-  bool lock_prefix : 1;
+  struct Decode_Context
+  {
+    bool lock_prefix : 1;
 
-  bool seg_override : 1;
-  enum Seg_Reg seg_override_reg : 2;
+    bool seg_override : 1;
+    enum Seg_Reg seg_override_reg : 2;
+  } curr_ctx, next_ctx;
+  bool was_prefix;
 };
 
-// In a real application, I would make this thread local
-struct Decode_Context CURR_DECODE_CONTEXT = {}; 
-struct Decode_Context NEXT_DECODE_CONTEXT = {};
+struct Instr _instr_decode(struct Byte_Stream* byte_stream, struct Decoder* decoder);
 
-struct Instr instr_decode(struct Byte_Stream* byte_stream, bool* was_prefix)
+struct Instr instr_decode(struct Byte_Stream* byte_stream, struct Decoder* decoder)
 {
-  struct Instr instr = _instr_decode(byte_stream);
+  const uint8_t* instr_begin = byte_stream->begin;
+  struct Instr instr = _instr_decode(byte_stream, decoder);
+  instr.size_in_bytes = byte_stream->begin - instr_begin;
 
-  instr.lock = CURR_DECODE_CONTEXT.lock_prefix;
+  instr.lock = decoder->curr_ctx.lock_prefix;
 
-  if(CURR_DECODE_CONTEXT.seg_override)
+  if(decoder->curr_ctx.seg_override)
   {
     if(op_is_addr(instr.src.variant))
     {
       instr.src.seg_override = true;
-      instr.src.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
+      instr.src.seg_override_reg = decoder->curr_ctx.seg_override_reg;
     }
     if(op_is_addr(instr.dest.variant))
     {
       instr.dest.seg_override = true;
-      instr.dest.seg_override_reg = CURR_DECODE_CONTEXT.seg_override_reg;
+      instr.dest.seg_override_reg = decoder->curr_ctx.seg_override_reg;
     }
   }
 
-
-  if(NEXT_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.seg_override)
+  if(decoder->next_ctx.lock_prefix || decoder->next_ctx.seg_override)
   {
-    *was_prefix = true;
-    NEXT_DECODE_CONTEXT.lock_prefix = CURR_DECODE_CONTEXT.lock_prefix || NEXT_DECODE_CONTEXT.lock_prefix;
-    CURR_DECODE_CONTEXT = NEXT_DECODE_CONTEXT;
+    decoder->was_prefix = true;
+    decoder->next_ctx.lock_prefix = decoder->curr_ctx.lock_prefix || decoder->next_ctx.lock_prefix;
+    decoder->curr_ctx = decoder->next_ctx;
   }else
   {
-    *was_prefix = false;
-    CURR_DECODE_CONTEXT = (struct Decode_Context){};
+    decoder->was_prefix = false;
+    decoder->curr_ctx = (struct Decode_Context){};
   }
-  NEXT_DECODE_CONTEXT = (struct Decode_Context){};
+  decoder->next_ctx = (struct Decode_Context){};
   
   return instr;
 }
 
-struct Instr _instr_decode(struct Byte_Stream* byte_stream)
+struct Instr _instr_decode(struct Byte_Stream* byte_stream, struct Decoder* decoder)
 {
   uint8_t bytes[6] = {};
   
@@ -75,7 +76,7 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
   if((bytes[0] & 0b11100111) == 0b00100110)
   {
     const uint8_t seg_reg = (bytes[0]&0b00011000)>>3;
-    NEXT_DECODE_CONTEXT = (struct Decode_Context){.seg_override=true, .seg_override_reg=seg_reg};
+    decoder->next_ctx = (struct Decode_Context){.seg_override=true, .seg_override_reg=seg_reg};
     return (struct Instr){};
   }
 
@@ -120,7 +121,7 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream)
   case 0373: return (struct Instr){.op = STI};
   case 0364: return (struct Instr){.op = HLT};
   case 0233: return (struct Instr){.op = WAIT};
-  case 0360: NEXT_DECODE_CONTEXT = (struct Decode_Context){.lock_prefix=true,}; return (struct Instr){};
+  case 0360: decoder->next_ctx = (struct Decode_Context){.lock_prefix=true,}; return (struct Instr){};
   case 0324:
   {
     bytes[1] = peek_u8(byte_stream);

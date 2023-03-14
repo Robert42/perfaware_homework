@@ -56,19 +56,14 @@ int main(int argc, char** argv)
     ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%lu)\n", filepath, ARRAY_LEN(bytes));
   }
 
-  // == first pass finding the labels (and debug printing) ==
-  uint16_t num_labels = 0;
-  uint16_t LABELS[ARRAY_LEN(bytes)] = {};
-
+  struct Decoder decoder = {};
   while(byte_stream.begin < byte_stream.end)
   {
-    bool was_prefix = false;
-
     if(LOG)
       fprintf(stderr, "%4lu |", byte_stream.begin - bytes);
-    const struct Instr instr = instr_decode(&byte_stream, &was_prefix);
+    const struct Instr instr = instr_decode(&byte_stream, &decoder);
 
-    if(was_prefix)
+    if(decoder.was_prefix)
     {
       fprintf(stderr, "\n");
       continue;
@@ -76,14 +71,6 @@ int main(int argc, char** argv)
 
     const size_t curr_pos = byte_stream.begin-bytes;
     ASSERT(curr_pos < UINT16_MAX);
-    if(has_label(instr.op))
-    {
-      if(LABELS[curr_pos+instr.ip_incr] == 0)
-      {
-        ASSERT(num_labels < UINT16_MAX);
-        LABELS[curr_pos+instr.ip_incr] = ++num_labels;
-      }
-    }
 
     if(LOG)
     {
@@ -91,30 +78,12 @@ int main(int argc, char** argv)
         fprintf(stderr, "    " + (LOG_BYTES==LB_HEX));
       BYTES_READ = 0;
       fprintf(stderr, "\t\t");
-      instr_print(instr, stderr, NULL, SIZE_MAX);
+      instr_print(instr, stderr);
     }
+    if(!decoder.was_prefix)
+      instr_print(instr, stdout);
   }
   if(LOG)
     fprintf(stderr, "\n");
   LOG = false;
-  
-  // == second pass with the actual output ==
-
-  printf("; %s\n", filepath);
-  printf("bits 16\n\n");
-
-  byte_stream.begin = bytes;
-  while(byte_stream.begin < byte_stream.end)
-  {
-    {
-      const size_t label_pos = byte_stream.begin-bytes;
-      if(LABELS[label_pos] != 0)
-        printf("label%" PRIu16 ":\n", LABELS[label_pos]-1);
-    }
-
-    bool was_prefix = false;
-    const struct Instr instr = instr_decode(&byte_stream, &was_prefix);
-    if(!was_prefix)
-      instr_print(instr, stdout, LABELS, byte_stream.begin-bytes);
-  }
 }
