@@ -109,6 +109,7 @@ struct Instr
 {
   enum Instr_Op op : 7;
   bool lock : 1;
+  uint8_t size_in_bytes : 3;
   union
   {
     struct{

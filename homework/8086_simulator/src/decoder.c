@@ -29,7 +29,9 @@ struct Instr _instr_decode(struct Byte_Stream* byte_stream, struct Decoder* deco
 
 struct Instr instr_decode(struct Byte_Stream* byte_stream, struct Decoder* decoder)
 {
+  const uint8_t* instr_begin = byte_stream->begin;
   struct Instr instr = _instr_decode(byte_stream, decoder);
+  instr.size_in_bytes = byte_stream->begin - instr_begin;
 
   instr.lock = decoder->curr_ctx.lock_prefix;
 
