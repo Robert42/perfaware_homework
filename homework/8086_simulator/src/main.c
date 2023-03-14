@@ -56,7 +56,6 @@ int main(int argc, char** argv)
     ASSERT(byte_stream.begin <= byte_stream.end, "File <%s> is too large to fit to the buffer (%lu)\n", filepath, ARRAY_LEN(bytes));
   }
 
-  // == first pass ==
   struct Decoder decoder = {};
   while(byte_stream.begin < byte_stream.end)
   {
@@ -81,22 +80,10 @@ int main(int argc, char** argv)
       fprintf(stderr, "\t\t");
       instr_print(instr, stderr);
     }
+    if(!decoder.was_prefix)
+      instr_print(instr, stdout);
   }
   if(LOG)
     fprintf(stderr, "\n");
   LOG = false;
-  
-  // == second pass with the actual output ==
-
-  printf("; %s\n", filepath);
-  printf("bits 16\n\n");
-
-  decoder = (struct Decoder){};
-  byte_stream.begin = bytes;
-  while(byte_stream.begin < byte_stream.end)
-  {
-    const struct Instr instr = instr_decode(&byte_stream, &decoder);
-    if(!decoder.was_prefix)
-      instr_print(instr, stdout);
-  }
 }
